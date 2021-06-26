@@ -11,6 +11,8 @@ and never publicly released due to countless issues.
 In April 2021, [Mikusch](https://github.com/Mikusch) decided to completely rewrite the plugin from the ground up with
 many needed fixes and additional gameplay elements.
 
+Forked by Nopied, for personal server use only.
+
 ## Features
 
 - Working Mann vs. Machine mechanics in regular gameplay
