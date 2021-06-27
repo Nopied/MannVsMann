@@ -13,7 +13,7 @@ many needed fixes and additional gameplay elements.
 
 Forked by Nopied, for personal server use only.
 
-## Features (Difference with original)
+## Features (Difference with original) - WIP!
 
 - Removed money HUD 
 - View Upgrade HUD to using +inspect command (instead of money HUD!)
