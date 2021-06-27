@@ -13,6 +13,12 @@ many needed fixes and additional gameplay elements.
 
 Forked by Nopied, for personal server use only.
 
+## Features (Difference with original)
+
+- Removed money HUD 
+- View Upgrade HUD to using +inspect command (instead of money HUD!)
+- Removed spawn protection
+
 ## Features
 
 - Working Mann vs. Machine mechanics in regular gameplay
