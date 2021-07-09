@@ -54,6 +54,8 @@ ConVar mvm_currency_rewards_player_killed;
 ConVar mvm_currency_rewards_player_count_bonus;
 ConVar mvm_reset_on_round_end;
 ConVar mvm_spawn_protection;
+ConVar mvm_disable_hud_currency;
+ConVar mvm_disable_respec_menu;
 
 //DHooks
 TFTeam g_CurrencyPackTeam;
@@ -99,6 +101,8 @@ public void OnPluginStart()
 	mvm_currency_rewards_player_count_bonus = CreateConVar("mvm_currency_rewards_player_count_bonus", "2.0", "Multiplier to dropped currency that gradually increases up to this value until all player slots have been filled.", _, true, 1.0);
 	mvm_reset_on_round_end = CreateConVar("mvm_reset_on_round_end", "1", "When set to 1, player upgrades and cash will reset when a full round has been played.");
 	mvm_spawn_protection = CreateConVar("mvm_spawn_protection", "0", "When set to 1, players are granted ubercharge while they leave their spawn.");
+	mvm_disable_hud_currency = CreateConVar("mvm_disable_hud_currency", "1", "When set to 1, disabled currency HUD.");
+	mvm_disable_respec_menu = CreateConVar("mvm_disable_respec_menu", "1", "When set to 1, disabled respec menu.");
 
 	HookEntityOutput("team_round_timer", "On10SecRemain", EntityOutput_OnTimer10SecRemain);
 
@@ -495,6 +499,8 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 			}
 			else if (strcmp(section, "MvM_UpgradesBegin") == 0)
 			{
+				if(mvm_disable_respec_menu.BoolValue)	return Plugin_Continue;
+
 				//Create a menu to substitute client-side "Refund Upgrades" button
 				Menu menu = new Menu(MenuHandler_UpgradeRespec, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
 

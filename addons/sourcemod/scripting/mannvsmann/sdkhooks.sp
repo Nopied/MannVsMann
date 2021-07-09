@@ -48,7 +48,7 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 public void Client_PostThink(int client)
 {
 	TFTeam team = TF2_GetClientTeam(client);
-	if (team > TFTeam_Spectator)
+	if (team > TFTeam_Spectator && !mvm_disable_hud_currency.BoolValue)
 	{
 		SetHudTextParams(-1.0, 0.75, 0.1, 122, 196, 55, 255, _, 0.0, 0.0, 0.0);
 		ShowSyncHudText(client, g_HudSync, "$%d ($%d)", MvMPlayer(client).Currency, MvMTeam(team).WorldCredits);
@@ -71,7 +71,7 @@ public Action Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor
 {
 	//Blast resistance also applies to self-inflicted damage in MvM
 	SetMannVsMachineMode(true);
-	
+
 	char classname[32];
 	if (weapon != -1 && GetEntityClassname(weapon, classname, sizeof(classname)))
 	{
@@ -82,7 +82,7 @@ public Action Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor
 			return Plugin_Changed;
 		}
 	}
-	
+
 	return Plugin_Continue;
 }
 
@@ -96,7 +96,7 @@ public Action ReviveMarker_SetTransmit(int marker, int client)
 	//Only transmit revive markers to our own team and spectators
 	if (TF2_GetClientTeam(client) != TFTeam_Spectator && TF2_GetTeam(marker) != TF2_GetClientTeam(client))
 		return Plugin_Handled;
-	
+
 	return Plugin_Continue;
 }
 
@@ -108,7 +108,7 @@ public void CurrencyPack_SpawnPost(int currencypack)
 		TFTeam team = TF2_GetTeam(currencypack);
 		MvMTeam(team).WorldCredits += GetEntData(currencypack, g_OffsetCurrencyPackAmount);
 	}
-	
+
 	SetEdictFlags(currencypack, (GetEdictFlags(currencypack) & ~FL_EDICT_ALWAYS));
 	SDKHook(currencypack, SDKHook_SetTransmit, CurrencyPack_SetTransmit);
 }
@@ -118,7 +118,7 @@ public Action CurrencyPack_SetTransmit(int currencypack, int client)
 	//Only transmit currency packs to our own team and spectators
 	if (TF2_GetClientTeam(client) != TFTeam_Spectator && TF2_GetTeam(currencypack) != TF2_GetClientTeam(client))
 		return Plugin_Handled;
-	
+
 	return Plugin_Continue;
 }
 
