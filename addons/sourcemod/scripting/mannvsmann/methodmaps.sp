@@ -28,7 +28,7 @@ methodmap MvMPlayer
 	{
 		return view_as<MvMPlayer>(client);
 	}
-	
+
 	property int Client
 	{
 		public get()
@@ -36,7 +36,7 @@ methodmap MvMPlayer
 			return view_as<int>(this);
 		}
 	}
-	
+
 	property Menu RespecMenu
 	{
 		public get()
@@ -48,7 +48,7 @@ methodmap MvMPlayer
 			g_PlayerRespecMenu[this] = menu;
 		}
 	}
-	
+
 	property int Currency
 	{
 		public get()
@@ -60,20 +60,20 @@ methodmap MvMPlayer
 			SetEntProp(this.Client, Prop_Send, "m_nCurrency", val);
 		}
 	}
-	
+
 	public void SetTeam(TFTeam team)
 	{
 		int count = ++g_PlayerTeamCount[this];
 		g_PlayerTeam[this][count - 1] = TF2_GetClientTeam(this.Client);
 		TF2_SetTeam(this.Client, team);
 	}
-	
+
 	public void ResetTeam()
 	{
 		int count = g_PlayerTeamCount[this]--;
 		TF2_SetTeam(this.Client, g_PlayerTeam[this][count - 1]);
 	}
-	
+
 	public void RemoveAllUpgrades()
 	{
 		//This clears the upgrade history and removes upgrade attributes from the player and their items
@@ -89,7 +89,7 @@ methodmap MvMTeam
 	{
 		return view_as<MvMTeam>(team);
 	}
-	
+
 	property int AcquiredCredits
 	{
 		public get()
@@ -101,7 +101,7 @@ methodmap MvMTeam
 			g_TeamAcquiredCredits[this] = val;
 		}
 	}
-	
+
 	property int WorldCredits
 	{
 		public get()
@@ -113,4 +113,90 @@ methodmap MvMTeam
 			g_TeamWorldCredits[this] = val;
 		}
 	}
+}
+
+enum CTFSpawnPoint_Items
+{
+	CTFSpawnPoint_Index = 0,
+	CTFSpawnPoint_Team,
+
+	CTFSpawnPoint_Item_MAX
+};
+
+methodmap CTFSpawnPoint < ArrayList
+{
+	 public CTFSpawnPoint(int index, int team)
+	 {
+		CTFSpawnPoint array =
+			view_as<CTFSpawnPoint>(new ArrayList());
+
+		array.Push(index);
+		array.Push(team);
+		return array;
+	 }
+
+	 property int Index
+	 {
+		 public get()
+		 {
+			 return this.Get(view_as<int>(CTFSpawnPoint_Index));
+		 }
+		 public set(int index)
+		 {
+			 this.Set(view_as<int>(CTFSpawnPoint_Index), index);
+		 }
+	 }
+	 property int Team
+	 {
+		 public get()
+		 {
+			 return this.Get(view_as<int>(CTFSpawnPoint_Team));
+		 }
+		 public set(int team)
+		 {
+			 this.Set(view_as<int>(CTFSpawnPoint_Team), team);
+		 }
+	 }
+}
+
+enum CornerList_Items
+{
+	CornerList_StartPosX = 0,
+	CornerList_StartPosZ,
+	CornerList_StartPosY,
+
+	CornerList_EndPosX,
+	CornerList_EndPosZ,
+	CornerList_EndPosY,
+
+	CornerList_Items_MAX
+};
+
+methodmap CornerList < ArrayList
+{
+	 public CornerList(float startPos[3], float endPos[3])
+	 {
+		CornerList array =
+			view_as<CornerList>(new ArrayList());
+
+		for(int pos = 0; pos < 3; pos++)
+			array.Push(startPos[pos]);
+
+		for(int pos = 0; pos < 3; pos++)
+			array.Push(endPos[pos]);
+
+		return array;
+	 }
+
+	 public void GetStartPos(float pos[3])
+	 {
+		 for(int loop = 0; loop < 3; loop++)
+		 	pos[loop] = this.Get(view_as<int>(CornerList_StartPosX) + loop);
+	 }
+
+	 public void GetEndPos(float pos[3])
+	 {
+		 for(int loop = 0; loop < 3; loop++)
+ 			pos[loop] = this.Get(view_as<int>(CornerList_EndPosX) + loop);
+	 }
 }

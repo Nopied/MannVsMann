@@ -18,10 +18,25 @@
 static int g_IsMannVsMachineModeCount;
 static bool g_IsMannVsMachineModeState[8];
 
+public void FloatToVector(float vector[3], float x, float z, float y)
+{
+	vector[0] = x, vector[1] = z, vector[2] = y;
+}
+
+stock float fmax(float x, float y)
+{
+	return x < y ? y : x;
+}
+
+stock float fmin(float x, float y)
+{
+	return x > y ? y : x;
+}
+
 bool WeaponID_IsSniperRifle(int weaponID)
 {
-	if (weaponID == TF_WEAPON_SNIPERRIFLE || 
-		weaponID == TF_WEAPON_SNIPERRIFLE_DECAP || 
+	if (weaponID == TF_WEAPON_SNIPERRIFLE ||
+		weaponID == TF_WEAPON_SNIPERRIFLE_DECAP ||
 		weaponID == TF_WEAPON_SNIPERRIFLE_CLASSIC)
 		return true;
 	else
