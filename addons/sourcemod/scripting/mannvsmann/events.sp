@@ -33,7 +33,7 @@ public Action Event_TeamplayBroadcastAudio(Event event, const char[] name, bool 
 {
 	char sound[PLATFORM_MAX_PATH];
 	event.GetString("sound", sound, sizeof(sound));
-	
+
 	if (strncmp(sound, "Game.TeamRoundStart", 19) == 0)
 	{
 		event.SetString("sound", "Announcer.MVM_Get_To_Upgrade");
@@ -49,7 +49,7 @@ public Action Event_TeamplayBroadcastAudio(Event event, const char[] name, bool 
 		event.SetString("sound", "music.mvm_lost_wave");
 		return Plugin_Changed;
 	}
-	
+
 	return Plugin_Continue;
 }
 
@@ -73,7 +73,7 @@ public void Event_TeamplaySetupFinished(Event event, const char[] name, bool don
 	{
 		//Disallow selling individual upgrades
 		SetEntProp(resource, Prop_Send, "m_nMannVsMachineWaveCount", 2);
-		
+
 		//Disable faster rage gain on heal
 		SetEntProp(resource, Prop_Send, "m_bMannVsMachineBetweenWaves", false);
 	}
@@ -89,7 +89,7 @@ public void Event_TeamplayRoundStart(Event event, const char[] name, bool dontBr
 		{
 			//Allow selling individual upgrades
 			SetEntProp(resource, Prop_Send, "m_nMannVsMachineWaveCount", 1);
-			
+
 			//Enable faster rage gain on heal
 			SetEntProp(resource, Prop_Send, "m_bMannVsMachineBetweenWaves", true);
 		}
@@ -104,7 +104,7 @@ public void Event_TeamplayRoundStart(Event event, const char[] name, bool dontBr
 public void Event_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	
+
 	if (TF2_GetPlayerClass(client) == TFClass_Medic)
 	{
 		//Allow medics to revive
@@ -117,16 +117,16 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 	//Never do this for mass-switches as it may lead to reliable buffer overflows
 	if (SDKCall_ShouldSwitchTeams() || SDKCall_ShouldScrambleTeams())
 		return;
-	
+
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
-	
+
 	if (team > TFTeam_Spectator)
 	{
 		SetEntProp(client, Prop_Send, "m_bInUpgradeZone", true);
 		MvMPlayer(client).RemoveAllUpgrades();
 		SetEntProp(client, Prop_Send, "m_bInUpgradeZone", false);
-		
+
 		int populator = FindEntityByClassname(MaxClients + 1, "info_populator");
 		if (populator != -1)
 		{
@@ -145,32 +145,32 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	int weaponid = event.GetInt("weaponid");
 	int death_flags = event.GetInt("death_flags");
 	bool silent_kill = event.GetBool("silent_kill");
-	
+
 	if (IsValidClient(attacker))
 	{
 		//Create currency pack
 		if (victim != attacker)
 		{
 			bool forceDistribute = TF2_GetPlayerClass(attacker) == TFClass_Sniper && WeaponID_IsSniperRifleOrBow(weaponid);
-			
+
 			//CTFPlayer::DropCurrencyPack does not assign a team to the currency pack but CTFGameRules::DistributeCurrencyAmount needs to know it
 			g_CurrencyPackTeam = TF2_GetClientTeam(attacker);
-			
+
 			int amount = mvm_currency_rewards_player_killed.IntValue;
 			float multiplier = (mvm_currency_rewards_player_count_bonus.FloatValue - 1.0) / MaxClients * (MaxClients - GetClientCount(true));
 			amount += RoundToCeil(mvm_currency_rewards_player_killed.IntValue * multiplier);
-			
+
 			//Enable MvM so money earned by Snipers gets force-distributed
 			SetMannVsMachineMode(true);
-			
+
 			if (forceDistribute)
 				SDKCall_DropCurrencyPack(victim, TF_CURRENCY_PACK_CUSTOM, amount, forceDistribute, attacker);
 			else
 				SDKCall_DropCurrencyPack(victim, TF_CURRENCY_PACK_CUSTOM, amount);
-			
+
 			ResetMannVsMachineMode();
 		}
-		
+
 		if (!(death_flags & TF_DEATHFLAG_DEADRINGER) && !silent_kill)
 		{
 			//Create revive marker
@@ -182,10 +182,10 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 public Action Event_PlayerBuyback(Event event, const char[] name, bool dontBroadcast)
 {
 	int player = event.GetInt("player");
-	
+
 	//Only broadcast to spectators and our own team
 	event.BroadcastDisabled = true;
-	
+
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (IsClientInGame(client) && (TF2_GetClientTeam(client) == TF2_GetClientTeam(player) || TF2_GetClientTeam(client) == TFTeam_Spectator))
@@ -193,17 +193,17 @@ public Action Event_PlayerBuyback(Event event, const char[] name, bool dontBroad
 			event.FireToClient(client);
 		}
 	}
-	
+
 	return Plugin_Changed;
 }
 
 public Action Event_PlayerUsedPowerupBottle(Event event, const char[] name, bool dontBroadcast)
 {
 	int player = event.GetInt("player");
-	
+
 	//Only broadcast to spectators and our own team
 	event.BroadcastDisabled = true;
-	
+
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (IsClientInGame(client) && (TF2_GetClientTeam(client) == TF2_GetClientTeam(player) || TF2_GetClientTeam(client) == TFTeam_Spectator))
@@ -211,6 +211,6 @@ public Action Event_PlayerUsedPowerupBottle(Event event, const char[] name, bool
 			event.FireToClient(client);
 		}
 	}
-	
+
 	return Plugin_Changed;
 }
