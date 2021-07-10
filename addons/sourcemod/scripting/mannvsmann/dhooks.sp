@@ -45,7 +45,8 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
 	CreateDynamicDetour(gamedata, "CBaseObject::ShouldQuickBuild", DHookCallback_ShouldQuickBuild_Pre, DHookCallback_ShouldQuickBuild_Post);
 	CreateDynamicDetour(gamedata, "CObjectSapper::ApplyRoboSapperEffects", DHookCallback_ApplyRoboSapperEffects_Pre, DHookCallback_ApplyRoboSapperEffects_Post);
-	
+	CreateDynamicDetour(gamedata, "CTFPowerupBottle::AllowedToUse", _, DHookCallback_PowerupBottle_AllowedToUse_Post);
+
 	g_DHookMyTouch = CreateDynamicHook(gamedata, "CCurrencyPack::MyTouch");
 	g_DHookComeToRest = CreateDynamicHook(gamedata, "CCurrencyPack::ComeToRest");
 	g_DHookValidTouch = CreateDynamicHook(gamedata, "CTFPowerup::ValidTouch");
@@ -60,7 +61,7 @@ void DHooks_HookGameRules()
 		g_DHookShouldRespawnQuickly.HookGamerules(Hook_Pre, DHookCallback_ShouldRespawnQuickly_Pre);
 		g_DHookShouldRespawnQuickly.HookGamerules(Hook_Post, DHookCallback_ShouldRespawnQuickly_Post);
 	}
-	
+
 	if (g_DHookRoundRespawn)
 	{
 		g_DHookRoundRespawn.HookGamerules(Hook_Pre, DHookCallback_RoundRespawn_Pre);
@@ -77,13 +78,13 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 			g_DHookMyTouch.HookEntity(Hook_Pre, entity, DHookCallback_MyTouch_Pre);
 			g_DHookMyTouch.HookEntity(Hook_Post, entity, DHookCallback_MyTouch_Post);
 		}
-		
+
 		if (g_DHookComeToRest)
 		{
 			g_DHookComeToRest.HookEntity(Hook_Pre, entity, DHookCallback_ComeToRest_Pre);
 			g_DHookComeToRest.HookEntity(Hook_Post, entity, DHookCallback_ComeToRest_Post);
 		}
-		
+
 		if (g_DHookValidTouch)
 		{
 			g_DHookValidTouch.HookEntity(Hook_Pre, entity, DHookCallback_ValidTouch_Pre);
@@ -99,7 +100,7 @@ static void CreateDynamicDetour(GameData gamedata, const char[] name, DHookCallb
 	{
 		if (callbackPre != INVALID_FUNCTION)
 			detour.Enable(Hook_Pre, callbackPre);
-		
+
 		if (callbackPost != INVALID_FUNCTION)
 			detour.Enable(Hook_Post, callbackPost);
 	}
@@ -114,7 +115,7 @@ static DynamicHook CreateDynamicHook(GameData gamedata, const char[] name)
 	DynamicHook hook = DynamicHook.FromConf(gamedata, name);
 	if (!hook)
 		LogError("Failed to create hook setup handle for %s", name);
-	
+
 	return hook;
 }
 
@@ -194,14 +195,14 @@ public MRESReturn DHookCallback_DistributeCurrencyAmount_Pre(DHookReturn ret, DH
 	{
 		int amount = params.Get(1);
 		bool shared = params.Get(3);
-		
+
 		if (shared)
 		{
 			//If the player is NULL, take the value of g_CurrencyPackTeam because our code has likely set it to something
 			TFTeam team = params.IsNull(2) ? g_CurrencyPackTeam : TF2_GetClientTeam(params.Get(2));
-			
+
 			MvMTeam(team).AcquiredCredits += amount;
-			
+
 			for (int client = 1; client <= MaxClients; client++)
 			{
 				if (IsClientInGame(client))
@@ -214,7 +215,7 @@ public MRESReturn DHookCallback_DistributeCurrencyAmount_Pre(DHookReturn ret, DH
 					{
 						MvMPlayer(client).SetTeam(TFTeam_Blue);
 					}
-					
+
 					EmitSoundToClient(client, SOUND_CREDITS_UPDATED, _, SNDCHAN_STATIC, SNDLEVEL_NONE, _, 0.1);
 				}
 			}
@@ -222,7 +223,7 @@ public MRESReturn DHookCallback_DistributeCurrencyAmount_Pre(DHookReturn ret, DH
 		else if (!params.IsNull(2))
 		{
 			int player = params.Get(2);
-			
+
 			EmitSoundToClient(player, SOUND_CREDITS_UPDATED, _, SNDCHAN_STATIC, SNDLEVEL_NONE, _, 0.1);
 		}
 	}
@@ -233,7 +234,7 @@ public MRESReturn DHookCallback_DistributeCurrencyAmount_Post(DHookReturn ret, D
 	if (IsMannVsMachineMode())
 	{
 		bool shared = params.Get(3);
-		
+
 		if (shared)
 		{
 			for (int client = 1; client <= MaxClients; client++)
@@ -272,9 +273,9 @@ public MRESReturn DHookCallback_CanRecieveMedigunChargeEffect_Post()
 public MRESReturn DHookCallback_RadiusSpyScan_Pre(Address playerShared)
 {
 	int outer = GetPlayerSharedOuter(playerShared);
-	
+
 	TFTeam team = TF2_GetClientTeam(outer);
-	
+
 	//RadiusSpyScan only allows defenders to see invaders, move all teammates to the defender team and enemies to the invader team
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -364,9 +365,9 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj)
 {
 	//Allows placing sappers on other players
 	SetMannVsMachineMode(true);
-	
+
 	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
-	
+
 	//The robot sapper only works on bots, give every player the fake client flag
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -380,9 +381,9 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj)
 public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj)
 {
 	ResetMannVsMachineMode();
-	
+
 	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
-	
+
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (IsClientInGame(client) && client != builder)
@@ -395,7 +396,7 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj)
 public MRESReturn DHookCallback_ShouldQuickBuild_Pre(int obj)
 {
 	SetMannVsMachineMode(true);
-	
+
 	//Sentries owned by MvM defenders can be re-deployed quickly, move the sentry to the defender team
 	g_PreHookTeam = TF2_GetTeam(obj);
 	TF2_SetTeam(obj, TFTeam_Red);
@@ -404,14 +405,14 @@ public MRESReturn DHookCallback_ShouldQuickBuild_Pre(int obj)
 public MRESReturn DHookCallback_ShouldQuickBuild_Post(int obj, DHookReturn ret)
 {
 	ResetMannVsMachineMode();
-	
+
 	TF2_SetTeam(obj, g_PreHookTeam);
 }
 
 public MRESReturn DHookCallback_ApplyRoboSapperEffects_Pre(int sapper, DHookReturn ret, DHookParam params)
 {
 	int target = params.Get(1);
-	
+
 	//Minibosses in MvM get slowed down instead of fully stunned
 	SetEntProp(target, Prop_Send, "m_bIsMiniBoss", true);
 }
@@ -419,20 +420,20 @@ public MRESReturn DHookCallback_ApplyRoboSapperEffects_Pre(int sapper, DHookRetu
 public MRESReturn DHookCallback_ApplyRoboSapperEffects_Post(int sapper, DHookReturn ret, DHookParam params)
 {
 	int target = params.Get(1);
-	
+
 	SetEntProp(target, Prop_Send, "m_bIsMiniBoss", false);
 }
 
 public MRESReturn DHookCallback_MyTouch_Pre(int currencypack, DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);
-	
+
 	//NOTE: You cannot substitute this virtual hook with SDKHooks because the Touch function for CItem is actually CItem::ItemTouch, and NOT CItem::MyTouch.
 	//CItem::ItemTouch simply calls CItem::MyTouch and deletes the entity if it returns true, which causes a TouchPost SDKHook to never get called!
-	
+
 	//Allows Scouts to gain health from currency packs and distributes the currency
 	SetMannVsMachineMode(true);
-	
+
 	//Enables money pickup voice lines
 	SetVariantString("IsMvMDefender:1");
 	AcceptEntityInput(player, "AddContext");
@@ -441,9 +442,9 @@ public MRESReturn DHookCallback_MyTouch_Pre(int currencypack, DHookReturn ret, D
 public MRESReturn DHookCallback_MyTouch_Post(int currencypack, DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);
-	
+
 	ResetMannVsMachineMode();
-	
+
 	SetVariantString("IsMvMDefender");
 	AcceptEntityInput(player, "RemoveContext");
 }
@@ -452,7 +453,7 @@ public MRESReturn DHookCallback_ComeToRest_Pre(int currencypack)
 {
 	//Enable MvM for currency distribution
 	SetMannVsMachineMode(true);
-	
+
 	//Set the currency pack team for distribution
 	g_CurrencyPackTeam = TF2_GetTeam(currencypack);
 }
@@ -460,7 +461,7 @@ public MRESReturn DHookCallback_ComeToRest_Pre(int currencypack)
 public MRESReturn DHookCallback_ComeToRest_Post()
 {
 	ResetMannVsMachineMode();
-	
+
 	g_CurrencyPackTeam = TFTeam_Invalid;
 }
 
@@ -479,10 +480,10 @@ public MRESReturn DHookCallback_ValidTouch_Post()
 public MRESReturn DHookCallback_ShouldRespawnQuickly_Pre(DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);
-	
+
 	//Enables quick respawn for Scouts
 	SetMannVsMachineMode(true);
-	
+
 	//MvM defenders are allowed to respawn quickly, move the player to the defender team
 	MvMPlayer(player).SetTeam(TFTeam_Red);
 }
@@ -490,9 +491,9 @@ public MRESReturn DHookCallback_ShouldRespawnQuickly_Pre(DHookReturn ret, DHookP
 public MRESReturn DHookCallback_ShouldRespawnQuickly_Post(DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);
-	
+
 	ResetMannVsMachineMode();
-	
+
 	MvMPlayer(player).ResetTeam();
 }
 
@@ -500,28 +501,28 @@ public MRESReturn DHookCallback_RoundRespawn_Pre()
 {
 	//NOTE: It is too late to run this logic in a teamplay_round_start event hook
 	//since it depends on the state of the round before the call to RoundRespawn.
-	
+
 	//Switch team credits if the teams are being switched
 	if (SDKCall_ShouldSwitchTeams())
 	{
 		int redCredits = MvMTeam(TFTeam_Red).AcquiredCredits;
 		int blueCredits = MvMTeam(TFTeam_Blue).AcquiredCredits;
-		
+
 		MvMTeam(TFTeam_Red).AcquiredCredits = blueCredits;
 		MvMTeam(TFTeam_Blue).AcquiredCredits = redCredits;
 	}
-	
+
 	int populator = FindEntityByClassname(MaxClients + 1, "info_populator");
 	if (populator != -1)
 	{
 		if (g_ForceMapReset)
 		{
 			g_ForceMapReset = !g_ForceMapReset;
-			
+
 			//Reset accumulated team credits on a full reset
 			MvMTeam(TFTeam_Red).AcquiredCredits = 0;
 			MvMTeam(TFTeam_Blue).AcquiredCredits = 0;
-			
+
 			//Reset currency for all clients
 			for (int client = 1; client <= MaxClients; client++)
 			{
@@ -532,7 +533,7 @@ public MRESReturn DHookCallback_RoundRespawn_Pre()
 					MvMPlayer(client).Currency = mvm_starting_currency.IntValue;
 				}
 			}
-			
+
 			//Reset player and item upgrades
 			SDKCall_ResetMap(populator);
 		}
@@ -551,4 +552,17 @@ public MRESReturn DHookCallback_RoundRespawn_Post()
 	{
 		SetEntData(populator, g_OffsetRestoringCheckpoint, false);
 	}
+}
+
+public MRESReturn DHookCallback_PowerupBottle_AllowedToUse_Post(int pThis, DHookReturn ret)
+{
+	if(pThis==-1)			return MRES_Ignored;
+
+	int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwnerEntity");
+
+	if(TF2_IsPlayerInCondition(owner, TFCond_Dazed))
+		return MRES_Ignored;
+
+	ret.Value = true;
+	return MRES_ChangedOverride;
 }

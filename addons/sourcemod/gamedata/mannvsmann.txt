@@ -124,6 +124,11 @@
 				"linux"		"@_Z20UTIL_RemoveImmediateP11CBaseEntity"
 				"windows"	"\x55\x8B\xEC\x56\x8B\x75\x08\x85\xF6\x74\x2A\xF6\x86\x14\x01\x00\x00\x01"
 			}
+			"CTFPowerupBottle::AllowedToUse"
+			{
+				"linux"		"@_ZN16CTFPowerupBottle12AllowedToUseEv"
+				"windows"	" "
+			}
 		}
 		"Offsets"
 		{
@@ -476,6 +481,13 @@
 				"hooktype"	"gamerules"
 				"return"	"void"
 				"this"		"ignore"
+			}
+			"CTFPowerupBottle::AllowedToUse"
+			{
+				"signature"	"CTFPowerupBottle::AllowedToUse"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"entity"
 			}
 		}
 		"Addresses"
