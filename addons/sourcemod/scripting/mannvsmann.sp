@@ -58,6 +58,7 @@ ConVar mvm_spawn_protection;
 ConVar mvm_disable_hud_currency;
 ConVar mvm_disable_respec_menu;
 ConVar mvm_drop_revivemarker;
+ConVar mvm_enable_music;
 
 //DHooks
 TFTeam g_CurrencyPackTeam;
@@ -119,6 +120,7 @@ public void OnPluginStart()
 	mvm_disable_hud_currency = CreateConVar("mvm_disable_hud_currency", "1", "When set to 1, disabled currency HUD.");
 	mvm_disable_respec_menu = CreateConVar("mvm_disable_respec_menu", "1", "When set to 1, disabled respec menu.");
 	mvm_drop_revivemarker = CreateConVar("mvm_drop_revivemarker", "0", "When set to 1, drop revive marker when player dead.");
+	mvm_enable_music = CreateConVar("mvm_enable_music", "1", "When set to 1, Mann vs. Machine music will play at the start and end of a round.");
 
 	HookEntityOutput("team_round_timer", "On10SecRemain", EntityOutput_OnTimer10SecRemain);
 
@@ -632,9 +634,12 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 
 public Action EntityOutput_OnTimer10SecRemain(const char[] output, int caller, int activator, float delay)
 {
-	if (GameRules_GetProp("m_bInSetup"))
+	if (mvm_enable_music.BoolValue)
 	{
-		EmitGameSoundToAll("music.mvm_start_mid_wave");
+		if (GameRules_GetProp("m_bInSetup"))
+		{
+			EmitGameSoundToAll("music.mvm_start_mid_wave");
+		}
 	}
 }
 
