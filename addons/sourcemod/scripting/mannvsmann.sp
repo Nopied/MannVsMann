@@ -89,7 +89,7 @@ bool g_ForceMapReset;
 public Plugin myinfo =
 {
 	name = "Mann vs. Mann",
-	author = "Mikusch", 
+	author = "Mikusch (Forked by Nopied◎)",
 	description = "Regular Team Fortress 2 with Mann vs. Machine upgrades",
 	version = PLUGIN_VERSION,
 	url = "https://github.com/Mikusch/MannVsMann"

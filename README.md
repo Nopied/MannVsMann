@@ -14,10 +14,11 @@ many needed fixes and additional gameplay elements.
 Forked by Nopied, for personal server use only.
 
 ## Features (Difference with original) - WIP!
-
-- Removed money HUD 
-- View Upgrade HUD to using +inspect command (instead of money HUD!)
-- Removed spawn protection
+### To suitable with FF2!
+- Disable money HUD, respec menu as default.
+- Added API
+- `info_player_teamspawn` is `func_upgradestation`
+- Disable spawn protection (Changed Defalut ConVar value)
 
 ## Features
 
