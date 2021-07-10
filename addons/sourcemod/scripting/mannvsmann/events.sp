@@ -146,7 +146,9 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	int death_flags = event.GetInt("death_flags");
 	bool silent_kill = event.GetBool("silent_kill");
 
-	if (IsValidClient(attacker))
+	int amount = mvm_currency_rewards_player_killed.IntValue;
+
+	if (amount > 0 && IsValidClient(attacker))
 	{
 		//Create currency pack
 		if (victim != attacker)
@@ -156,7 +158,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 			//CTFPlayer::DropCurrencyPack does not assign a team to the currency pack but CTFGameRules::DistributeCurrencyAmount needs to know it
 			g_CurrencyPackTeam = TF2_GetClientTeam(attacker);
 
-			int amount = mvm_currency_rewards_player_killed.IntValue;
+
 			float multiplier = (mvm_currency_rewards_player_count_bonus.FloatValue - 1.0) / MaxClients * (MaxClients - GetClientCount(true));
 			amount += RoundToCeil(mvm_currency_rewards_player_killed.IntValue * multiplier);
 
