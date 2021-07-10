@@ -56,6 +56,7 @@ ConVar mvm_reset_on_round_end;
 ConVar mvm_spawn_protection;
 ConVar mvm_disable_hud_currency;
 ConVar mvm_disable_respec_menu;
+ConVar mvm_drop_revivemarker;
 
 //DHooks
 TFTeam g_CurrencyPackTeam;
@@ -103,6 +104,7 @@ public void OnPluginStart()
 	mvm_spawn_protection = CreateConVar("mvm_spawn_protection", "0", "When set to 1, players are granted ubercharge while they leave their spawn.");
 	mvm_disable_hud_currency = CreateConVar("mvm_disable_hud_currency", "1", "When set to 1, disabled currency HUD.");
 	mvm_disable_respec_menu = CreateConVar("mvm_disable_respec_menu", "1", "When set to 1, disabled respec menu.");
+	mvm_drop_revivemarker = CreateConVar("mvm_drop_revivemarker", "0", "When set to 1, drop revive marker when player dead.");
 
 	HookEntityOutput("team_round_timer", "On10SecRemain", EntityOutput_OnTimer10SecRemain);
 
