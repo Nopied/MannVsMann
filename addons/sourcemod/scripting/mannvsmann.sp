@@ -22,6 +22,7 @@
 #include <dhooks>
 #include <tf2attributes>
 #include <memorypatch>
+#include <mannvsmann>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -71,6 +72,7 @@ int g_OffsetRestoringCheckpoint;
 ArrayList g_hCornerList;
 int g_BeamSprite, g_HaloSprite;
 Handle g_HudSync;
+Handle g_onTouchedUpgradeStation;
 bool g_ForceMapReset;
 
 #include "mannvsmann/methodmaps.sp"
@@ -82,13 +84,25 @@ bool g_ForceMapReset;
 #include "mannvsmann/sdkhooks.sp"
 #include "mannvsmann/sdkcalls.sp"
 
-public Plugin myinfo = 
+#include "mannvsmann/natives.sp"
+
+public Plugin myinfo =
 {
-	name = "Mann vs. Mann", 
+	name = "Mann vs. Mann",
 	author = "Mikusch", 
-	description = "Regular Team Fortress 2 with Mann vs. Machine upgrades", 
-	version = PLUGIN_VERSION, 
+	description = "Regular Team Fortress 2 with Mann vs. Machine upgrades",
+	version = PLUGIN_VERSION,
 	url = "https://github.com/Mikusch/MannVsMann"
+}
+
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+	g_onTouchedUpgradeStation = CreateGlobalForward("MVM_OnTouchedUpgradeStation", ET_Hook, Param_Cell, Param_Cell); // upgradeStation, client
+
+	// mannvsmann/natives.sp
+	Natives_Initialize();
+
+	RegPluginLibrary("mannvsmann");
 }
 
 public void OnPluginStart()
@@ -339,6 +353,9 @@ public void OnMapStart()
 
 			TeleportEntity(upgradestation, origin, NULL_VECTOR, NULL_VECTOR);
 			ActivateEntity(upgradestation);
+
+			SDKHook(upgradestation, SDKHook_StartTouch, OnTouchUpgradeStation);
+			SDKHook(upgradestation, SDKHook_Touch, OnTouchUpgradeStation);
 		}
 	}
 
@@ -363,6 +380,22 @@ public void OnMapStart()
 	}
 
 	CreateTimer(1.0, Timer_BeamPoint, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public Action OnTouchUpgradeStation(int upgradeStation, int other)
+{
+	if(!IsValidClient(other))		return Plugin_Continue;
+
+	Action action = Plugin_Continue;
+	Call_StartForward(g_onTouchedUpgradeStation);
+	Call_PushCell(upgradeStation);
+	Call_PushCell(other);
+	Call_Finish(action);
+
+	if(action != Plugin_Continue)
+		return Plugin_Handled;
+
+	return Plugin_Continue;
 }
 
 public Action Timer_BeamPoint(Handle timer)
