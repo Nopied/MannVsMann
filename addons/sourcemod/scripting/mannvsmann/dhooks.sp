@@ -560,7 +560,8 @@ public MRESReturn DHookCallback_PowerupBottle_AllowedToUse_Post(int pThis, DHook
 
 	int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwnerEntity");
 
-	if(TF2_IsPlayerInCondition(owner, TFCond_Dazed))
+	if(!IsPlayerAlive(owner)
+	|| TF2_IsPlayerInCondition(owner, TFCond_Dazed))
 		return MRES_Ignored;
 
 	ret.Value = true;
