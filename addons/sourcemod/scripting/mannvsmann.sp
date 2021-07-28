@@ -316,6 +316,9 @@ public void OnMapStart()
 					? previousPos[pos] : maxPos[pos];
 				minPos[pos] = previousPos[pos] < minPos[pos] || minPos[pos] == 0.0
 					? previousPos[pos] : minPos[pos];
+
+				if(pos < 2 && maxPos[pos] - minPos[pos] < 100.0)
+					maxPos[pos] += 50.0, minPos[pos] -= 50.0;
 			}
 		}
 
