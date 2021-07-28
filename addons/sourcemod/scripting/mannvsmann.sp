@@ -59,6 +59,7 @@ ConVar mvm_disable_hud_currency;
 ConVar mvm_disable_respec_menu;
 ConVar mvm_drop_revivemarker;
 ConVar mvm_enable_music;
+ConVar mvm_carteen_cooldown;
 
 //DHooks
 TFTeam g_CurrencyPackTeam;
@@ -121,6 +122,7 @@ public void OnPluginStart()
 	mvm_disable_respec_menu = CreateConVar("mvm_disable_respec_menu", "1", "When set to 1, disabled respec menu.");
 	mvm_drop_revivemarker = CreateConVar("mvm_drop_revivemarker", "0", "When set to 1, drop revive marker when player dead.");
 	mvm_enable_music = CreateConVar("mvm_enable_music", "1", "When set to 1, Mann vs. Machine music will play at the start and end of a round.");
+	mvm_carteen_cooldown = CreateConVar("mvm_carteen_cooldown", "30.0", "Cooldown time of carteen.", _, true, 0.0);
 
 	HookEntityOutput("team_round_timer", "On10SecRemain", EntityOutput_OnTimer10SecRemain);
 
@@ -442,6 +444,8 @@ void PrecacheBeamPoint()
 
 public void OnClientPutInServer(int client)
 {
+	MvMPlayer(client).CarteenCooldown = 0.0;
+
 	SDKHooks_HookClient(client);
 }
 

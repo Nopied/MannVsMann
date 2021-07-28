@@ -27,6 +27,9 @@ void Events_Initialize()
 	HookEvent("player_team", Event_PlayerTeam);
 	HookEvent("player_buyback", Event_PlayerBuyback, EventHookMode_Pre);
 	HookEvent("player_used_powerup_bottle", Event_PlayerUsedPowerupBottle, EventHookMode_Pre);
+
+	HookEvent("arena_round_start", Event_RoundStart);
+	HookEvent("teamplay_round_active", Event_RoundStart); // for non-arena maps
 }
 
 public Action Event_TeamplayBroadcastAudio(Event event, const char[] name, bool dontBroadcast)
@@ -218,4 +221,12 @@ public Action Event_PlayerUsedPowerupBottle(Event event, const char[] name, bool
 	}
 
 	return Plugin_Changed;
+}
+
+public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
+{
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		MvMPlayer(client).CarteenCooldown = 0.0;
+	}
 }

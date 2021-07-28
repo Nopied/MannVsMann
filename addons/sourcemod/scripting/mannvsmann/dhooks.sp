@@ -564,6 +564,14 @@ public MRESReturn DHookCallback_PowerupBottle_AllowedToUse_Post(int pThis, DHook
 	|| TF2_IsPlayerInCondition(owner, TFCond_Dazed))
 		return MRES_Ignored;
 
+	if(MvMPlayer(owner).CarteenCooldown > GetGameTime())
+	{
+		ret.Value = false;
+		return MRES_ChangedOverride;
+	}
+
 	ret.Value = true;
+	MvMPlayer(owner).CarteenCooldown = GetGameTime() + mvm_carteen_cooldown.FloatValue;
+
 	return MRES_ChangedOverride;
 }

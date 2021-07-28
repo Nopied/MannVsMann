@@ -6,6 +6,15 @@
 // TODO: methodmap support
 
 /*
+    Get/set player's carteen cooldown
+
+    @param client   player's index
+    @param time     cooldown time
+*/
+native float MVM_GetPlayerCarteenCooldown(int client);
+native void MVM_SetPlayerCarteenCooldown(int client, float time);
+
+/*
     Get player's currency
 
     @param client       player's index
@@ -59,6 +68,8 @@ public SharedPlugin __pl_MVM=
 #if !defined REQUIRE_PLUGIN
 public __pl_MVM_SetNTVOptional()
 {
+    MarkNativeAsOptional("MVM_GetPlayerCarteenCooldown");
+    MarkNativeAsOptional("MVM_SetPlayerCarteenCooldown");
     MarkNativeAsOptional("MVM_GetPlayerCurrency");
     MarkNativeAsOptional("MVM_SetPlayerCurrency");
     MarkNativeAsOptional("MVM_RemoveAllUpgrades");
