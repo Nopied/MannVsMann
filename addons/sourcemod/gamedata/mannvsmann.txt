@@ -99,6 +99,11 @@
 				"linux"		"@_ZN9CTFPlayer10RegenThinkEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x74\x57\x8B\xF9\x8B\x07"
 			}
+			"CTFPlayer::Regenerate"
+			{
+				"linux"		"@_ZN9CTFPlayer10RegenerateEb"
+				"windows"	""
+			}
 			"CTFReviveMarker::Create"
 			{
 				"linux"		"@_ZN15CTFReviveMarker6CreateEP9CTFPlayer"
@@ -386,6 +391,20 @@
 				"callconv"	"thiscall"
 				"return"	"void"
 				"this"		"entity"
+			}
+			"CTFPlayer::Regenerate"
+			{
+				"signature"	"CTFPlayer::Regenerate"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"bRefillHealthAndAmmo"
+					{
+						"type"		"bool"
+					}
+				}
 			}
 			"CBaseObject::FindSnapToBuildPos"
 			{

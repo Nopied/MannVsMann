@@ -42,6 +42,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFPlayer::CanBuild", DHookCallback_CanBuild_Pre, DHookCallback_CanBuild_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ManageRegularWeapons", DHookCallback_ManageRegularWeapons_Pre, DHookCallback_ManageRegularWeapons_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::RegenThink", DHookCallback_RegenThink_Pre, DHookCallback_RegenThink_Post);
+	CreateDynamicDetour(gamedata, "CTFPlayer::Regenerate", DHookCallback_Regenerate_Pre);
 	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
 	CreateDynamicDetour(gamedata, "CBaseObject::ShouldQuickBuild", DHookCallback_ShouldQuickBuild_Pre, DHookCallback_ShouldQuickBuild_Post);
 	CreateDynamicDetour(gamedata, "CObjectSapper::ApplyRoboSapperEffects", DHookCallback_ApplyRoboSapperEffects_Pre, DHookCallback_ApplyRoboSapperEffects_Post);
@@ -359,6 +360,17 @@ public MRESReturn DHookCallback_RegenThink_Pre()
 public MRESReturn DHookCallback_RegenThink_Post()
 {
 	ResetMannVsMachineMode();
+}
+
+public MRESReturn DHookCallback_Regenerate_Pre(int pThis)
+{
+	if(GetEntProp(pThis, Prop_Send, "m_bInUpgradeZone") > 0)
+	{
+		TF2Util_UpdatePlayerSpeed(pThis, true);
+		return MRES_Supercede;
+	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj)
