@@ -24,7 +24,7 @@ void Events_Initialize()
 	HookEvent("teamplay_round_start", Event_TeamplayRoundStart);
 	HookEvent("post_inventory_application", Event_PostInventoryApplication);
 	HookEvent("player_death", Event_PlayerDeath);
-	HookEvent("player_team", Event_PlayerTeam);
+	// HookEvent("player_team", Event_PlayerTeam);
 	HookEvent("player_buyback", Event_PlayerBuyback, EventHookMode_Pre);
 	HookEvent("player_used_powerup_bottle", Event_PlayerUsedPowerupBottle, EventHookMode_Pre);
 
@@ -126,8 +126,10 @@ public void Event_PostInventoryApplication(Event event, const char[] name, bool 
 public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
 	//Never do this for mass-switches as it may lead to reliable buffer overflows
+	/* ok.
 	if (SDKCall_ShouldSwitchTeams() || SDKCall_ShouldScrambleTeams())
 		return;
+	*/
 
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
