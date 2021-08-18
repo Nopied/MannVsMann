@@ -19,6 +19,7 @@
 #include <sdktools>
 #include <sdkhooks>
 #include <tf2_stocks>
+#include <tf2utils>
 #include <dhooks>
 #include <tf2attributes>
 #include <memorypatch>
