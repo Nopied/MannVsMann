@@ -449,6 +449,7 @@ void PrecacheBeamPoint()
 public void OnClientPutInServer(int client)
 {
 	MvMPlayer(client).CarteenCooldown = 0.0;
+	MvMPlayer(client).Currency = mvm_starting_currency.IntValue;
 
 	SDKHooks_HookClient(client);
 }
