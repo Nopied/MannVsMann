@@ -47,6 +47,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CBaseObject::ShouldQuickBuild", DHookCallback_ShouldQuickBuild_Pre, DHookCallback_ShouldQuickBuild_Post);
 	CreateDynamicDetour(gamedata, "CObjectSapper::ApplyRoboSapperEffects", DHookCallback_ApplyRoboSapperEffects_Pre, DHookCallback_ApplyRoboSapperEffects_Post);
 	CreateDynamicDetour(gamedata, "CTFPowerupBottle::AllowedToUse", _, DHookCallback_PowerupBottle_AllowedToUse_Post);
+	CreateDynamicDetour(gamedata, "CWeaponMedigun::HealTargetThink", DHookCallback_Medigun_HealTargetThink_Pre, DHookCallback_Medigun_HealTargetThink_Post);
 
 	g_DHookMyTouch = CreateDynamicHook(gamedata, "CCurrencyPack::MyTouch");
 	g_DHookComeToRest = CreateDynamicHook(gamedata, "CCurrencyPack::ComeToRest");
@@ -586,4 +587,39 @@ public MRESReturn DHookCallback_PowerupBottle_AllowedToUse_Post(int pThis, DHook
 	MvMPlayer(owner).CarteenCooldown = GetGameTime() + mvm_carteen_cooldown.FloatValue;
 
 	return MRES_ChangedOverride;
+}
+
+int g_iHealthBeforeHeal = -1;
+public MRESReturn DHookCallback_Medigun_HealTargetThink_Pre(int pThis)
+{
+	if(pThis==-1)			return MRES_Ignored;
+
+	int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwnerEntity"),
+		healingTarget = GetEntPropEnt(pThis, Prop_Send, "m_hHealingTarget");
+
+	if(!IsPlayerAlive(owner) || (0 < healingTarget && healingTarget <= MaxClients))
+		return MRES_Ignored;
+
+	if(MvMPlayer(owner).ReviveThinkCooldown >= GetGameTime())
+	{
+		g_iHealthBeforeHeal = GetEntProp(healingTarget, Prop_Data, "m_iHealth");
+		return MRES_Ignored;
+	}
+
+	MvMPlayer(owner).ReviveThinkCooldown = GetGameTime() + 0.15;
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_Medigun_HealTargetThink_Post(int pThis)
+{
+	int health = g_iHealthBeforeHeal;
+	g_iHealthBeforeHeal = -1;
+
+	if(pThis==-1)			return MRES_Ignored;
+
+	int healingTarget = GetEntPropEnt(pThis, Prop_Send, "m_hHealingTarget");
+	if(health >= 0)
+		SetEntProp(healingTarget, Prop_Data, "m_iHealth", health);
+
+	return MRES_Ignored;
 }

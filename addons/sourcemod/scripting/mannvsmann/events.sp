@@ -105,6 +105,11 @@ public void Event_TeamplayRoundStart(Event event, const char[] name, bool dontBr
 			SetEntProp(resource, Prop_Send, "m_bMannVsMachineBetweenWaves", false);
 		}
 	}
+
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		MvMPlayer(client).ReviveThinkCooldown = 0.0;
+	}
 }
 
 public void Event_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)

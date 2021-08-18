@@ -134,6 +134,11 @@
 				"linux"		"@_ZN16CTFPowerupBottle12AllowedToUseEv"
 				"windows"	" "
 			}
+			"CWeaponMedigun::HealTargetThink"
+			{
+				"linux"		"@_ZN14CWeaponMedigun15HealTargetThinkEv"
+				"windows"	" "
+			}
 		}
 		"Offsets"
 		{
@@ -506,6 +511,13 @@
 				"signature"	"CTFPowerupBottle::AllowedToUse"
 				"callconv"	"thiscall"
 				"return"	"bool"
+				"this"		"entity"
+			}
+			"CWeaponMedigun::HealTargetThink"
+			{
+				"signature" "CWeaponMedigun::HealTargetThink"
+				"callconv"	"thiscall"
+				"return"	"void"
 				"this"		"entity"
 			}
 		}
