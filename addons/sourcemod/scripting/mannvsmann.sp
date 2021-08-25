@@ -61,6 +61,7 @@ ConVar mvm_disable_respec_menu;
 ConVar mvm_drop_revivemarker;
 ConVar mvm_enable_music;
 ConVar mvm_carteen_cooldown;
+ConVar mvm_allow_dropweapon;
 
 //DHooks
 TFTeam g_CurrencyPackTeam;
@@ -124,6 +125,7 @@ public void OnPluginStart()
 	mvm_drop_revivemarker = CreateConVar("mvm_drop_revivemarker", "0", "When set to 1, drop revive marker when player dead.");
 	mvm_enable_music = CreateConVar("mvm_enable_music", "1", "When set to 1, Mann vs. Machine music will play at the start and end of a round.");
 	mvm_carteen_cooldown = CreateConVar("mvm_carteen_cooldown", "30.0", "Cooldown time of carteen.", _, true, 0.0);
+	mvm_allow_dropweapon = CreateConVar("mvm_allow_dropweapon", "0", "When set to 1, drop player's weapon when player dead.");
 
 	HookEntityOutput("team_round_timer", "On10SecRemain", EntityOutput_OnTimer10SecRemain);
 
@@ -474,9 +476,25 @@ public void OnEntityCreated(int entity, const char[] classname)
 	}
 	else if (strcmp(classname, "tf_dropped_weapon") == 0)
 	{
+		//  && !IsFakeClient(owner)
+		SDKHook(entity, SDKHook_SpawnPost, OnDroppedWeaponSpawned);
+		if(mvm_allow_dropweapon.IntValue == 0)
+			RemoveEntity(entity);
+
 		//Do not allow dropped weapons, as you can sell their upgrades for free currency
-		RemoveEntity(entity);
+		//ㄴ NO.
 	}
+}
+
+public void OnDroppedWeaponSpawned(int weapon)
+{
+	/*
+	int id = GetEntProp(weapon, Prop_Send, "m_iAccountID");
+	if(GetIndexOfAccountID(id) == -1)
+	 	RemoveEntity(weapon);
+	*/
+
+	// PrintToChatAll("%N", GetIndexOfAccountID(id));
 }
 
 public void OnEntityDestroyed(int entity)
