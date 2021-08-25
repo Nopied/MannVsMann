@@ -26,15 +26,55 @@ static DynamicHook g_DHookRoundRespawn;
 static RoundState g_PreHookRoundState;
 static TFTeam g_PreHookTeam;	//Note: For clients, use the MvMPlayer methodmap
 
+static int g_iBannedUpgrade[] = {
+	59, 	// Movement Speed
+	26,  	// Milk: On-Hit slowdown
+	24		// Airblast Power
+};
+
+/*
+static int g_iBannedAttribDefIndex[] = {
+	851, 	// Movement Speed
+	313,  	// Milk: On-Hit slowdown
+	255		// Airblast Power
+};
+*/
+
+stock bool IsBannedUpgrade(int upgrade)
+{
+	for(int loop = 0; loop < sizeof(g_iBannedUpgrade); loop++)
+	{
+		if(g_iBannedUpgrade[loop] == upgrade)
+			return true;
+	}
+
+	return false;
+}
+
+/*
+stock bool IsBannedAttribIndex(int index)
+{
+	for(int loop = 0; loop < sizeof(g_iBannedAttribDefIndex); loop++)
+	{
+		if(g_iBannedAttribDefIndex[loop] == index)
+			return true;
+	}
+
+	return false;
+}
+*/
+
 void DHooks_Initialize(GameData gamedata)
 {
-	CreateDynamicDetour(gamedata, "CUpgrades::ApplyUpgradeToItem", DHookCallback_ApplyUpgradeToItem_Pre, DHookCallback_ApplyUpgradeToItem_Post);
+	// CreateDynamicDetour(gamedata, "CUpgrades::ApplyUpgradeToItem", DHookCallback_ApplyUpgradeToItem_Pre, DHookCallback_ApplyUpgradeToItem_Post);
+	CreateDynamicDetour(gamedata, "CUpgrades::PlayerPurchasingUpgrade", DHookCallback_PlayerPurchasingUpgrade_Pre, DHookCallback_PlayerPurchasingUpgrade_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_PopulationManagerUpdate_Pre, _);
 	CreateDynamicDetour(gamedata, "CPopulationManager::ResetMap", DHookCallback_PopulationManagerResetMap_Pre, DHookCallback_PopulationManagerResetMap_Post);
 	CreateDynamicDetour(gamedata, "CTFGameRules::IsQuickBuildTime", DHookCallback_IsQuickBuildTime_Pre, DHookCallback_IsQuickBuildTime_Post);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GameModeUsesUpgrades", _, DHookCallback_GameModeUsesUpgrades_Post);
 	CreateDynamicDetour(gamedata, "CTFGameRules::CanPlayerUseRespec", DHookCallback_CanPlayerUseRespec_Pre, DHookCallback_CanPlayerUseRespec_Post);
 	CreateDynamicDetour(gamedata, "CTFGameRules::DistributeCurrencyAmount", DHookCallback_DistributeCurrencyAmount_Pre, DHookCallback_DistributeCurrencyAmount_Post);
+	// CreateDynamicDetour(gamedata, "CTFGameRules::CanUpgradeWithAttrib", DHookCallback_CanUpgradeWithAttrib_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayerShared::ConditionGameRulesThink", DHookCallback_ConditionGameRulesThink_Pre, DHookCallback_ConditionGameRulesThink_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayerShared::CanRecieveMedigunChargeEffect", DHookCallback_CanRecieveMedigunChargeEffect_Pre, DHookCallback_CanRecieveMedigunChargeEffect_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayerShared::RadiusSpyScan", DHookCallback_RadiusSpyScan_Pre, DHookCallback_RadiusSpyScan_Post);
@@ -48,6 +88,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CObjectSapper::ApplyRoboSapperEffects", DHookCallback_ApplyRoboSapperEffects_Pre, DHookCallback_ApplyRoboSapperEffects_Post);
 	CreateDynamicDetour(gamedata, "CTFPowerupBottle::AllowedToUse", _, DHookCallback_PowerupBottle_AllowedToUse_Post);
 	CreateDynamicDetour(gamedata, "CWeaponMedigun::HealTargetThink", DHookCallback_Medigun_HealTargetThink_Pre, DHookCallback_Medigun_HealTargetThink_Post);
+	// CreateDynamicDetour(gamedata, "CTFGameRules::GetUpgradeTier", DHookCallback_GameRules_GetUpgradeTier_Pre, DHookCallback_GameRules_GetUpgradeTier_Post);
 
 	g_DHookMyTouch = CreateDynamicHook(gamedata, "CCurrencyPack::MyTouch");
 	g_DHookComeToRest = CreateDynamicHook(gamedata, "CCurrencyPack::ComeToRest");
@@ -120,14 +161,47 @@ static DynamicHook CreateDynamicHook(GameData gamedata, const char[] name)
 
 	return hook;
 }
-
-public MRESReturn DHookCallback_ApplyUpgradeToItem_Pre()
+/*
+public MRESReturn DHookCallback_ApplyUpgradeToItem_Pre(int pThis, DHookReturn ret, DHookParam params)
 {
 	//This function has some special logic for MvM that we want
 	SetMannVsMachineMode(true);
+
+
+	int iUpgrade = params.Get(3);
+	// PrintToServer("DHookCallback_ApplyUpgradeToItem_Pre > Banned Check: %d", iUpgrade);
+	if(IsBannedUpgrade(iUpgrade))
+	{
+		// PrintToServer("Banned");
+		ret.Value = 0xFFFF;
+		return MRES_Supercede;
+	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ApplyUpgradeToItem_Post()
+{
+	ResetMannVsMachineMode();
+}
+*/
+
+public MRESReturn DHookCallback_PlayerPurchasingUpgrade_Pre(int pThis, DHookParam params)
+{
+	SetMannVsMachineMode(true);
+
+	int iUpgrade = params.Get(3);
+	// PrintToServer("DHookCallback_PlayerPurchasingUpgrade_Pre > Banned Check: %d", iUpgrade);
+	if(IsBannedUpgrade(iUpgrade))
+	{
+		// PrintToServer("Banned");
+		return MRES_Supercede;
+	}
+
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_PlayerPurchasingUpgrade_Post()
 {
 	ResetMannVsMachineMode();
 }
@@ -249,6 +323,22 @@ public MRESReturn DHookCallback_DistributeCurrencyAmount_Post(DHookReturn ret, D
 		}
 	}
 }
+
+/*
+public MRESReturn DHookCallback_CanUpgradeWithAttrib_Pre(DHookReturn ret, DHookParam params)
+{
+	int attribIndex = params.Get(3);
+	PrintToServer("DHookCallback_CanUpgradeWithAttrib_Pre > Banned Check: index %d", attribIndex);
+	if(IsBannedAttribIndex(attribIndex))
+	{
+		PrintToServer("Banned");
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+
+	return MRES_Ignored;
+}
+*/
 
 public MRESReturn DHookCallback_ConditionGameRulesThink_Pre()
 {
@@ -623,3 +713,23 @@ public MRESReturn DHookCallback_Medigun_HealTargetThink_Post(int pThis)
 
 	return MRES_Ignored;
 }
+
+/*
+public MRESReturn DHookCallback_GameRules_GetUpgradeTier_Pre(int pThis, DHookReturn ret, DHookParam params)
+{
+	int iUpgrade = params.Get(1);
+	// PrintToServer("Banned Check: %d", iUpgrade);
+ 	if(IsBannedUpgrade(iUpgrade))
+	{
+		// PrintToServer("Banned");
+		ret.Value = 0;
+		return MRES_Supercede;
+	}
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_GameRules_GetUpgradeTier_Post(int pThis, DHookReturn ret, DHookParam params)
+{
+	return MRES_Ignored;
+}
+*/

@@ -9,6 +9,11 @@
 				"linux"		"@_ZN9CUpgrades18ApplyUpgradeToItemEP9CTFPlayerP13CEconItemViewiibb"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x57\x8B\x7D\x08\x89\x4D\xF8"
 			}
+			"CUpgrades::PlayerPurchasingUpgrade"
+			{
+				"linux"		"@_ZN9CUpgrades23PlayerPurchasingUpgradeEP9CTFPlayeriibbb"
+				"windows"	" "
+			}
 			"CPopulationManager::Update"
 			{
 				"linux"		"@_ZN18CPopulationManager6UpdateEv"
@@ -48,6 +53,11 @@
 			{
 				"linux"		"@_ZN12CTFGameRules24DistributeCurrencyAmountEiP9CTFPlayerbbb"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x80\x7D\x10\x00"
+			}
+			"CTFGameRules::CanUpgradeWithAttrib"
+			{
+				"linux"		"@_ZN12CTFGameRules20CanUpgradeWithAttribEP9CTFPlayeritP22CMannVsMachineUpgrades"
+				"windows"	" "
 			}
 			"CTFPlayerShared::ConditionGameRulesThink"
 			{
@@ -137,6 +147,11 @@
 			"CWeaponMedigun::HealTargetThink"
 			{
 				"linux"		"@_ZN14CWeaponMedigun15HealTargetThinkEv"
+				"windows"	" "
+			}
+			"CTFGameRules::GetUpgradeTier"
+			{
+				"linux"		"@_ZN12CTFGameRules14GetUpgradeTierEi"
 				"windows"	" "
 			}
 		}
@@ -244,6 +259,40 @@
 					}
 				}
 			}
+			"CUpgrades::PlayerPurchasingUpgrade"
+			{
+				"signature"	"CUpgrades::PlayerPurchasingUpgrade"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"pTFPlayer"
+					{
+						"type"	"cbaseentity"
+					}
+					"iItemSlot"
+					{
+						"type"	"int"
+					}
+					"iUpgrade"
+					{
+						"type"	"int"
+					}
+					"bDowngrade"
+					{
+						"type"	"bool"
+					}
+					"bFree"
+					{
+						"type"	"bool"
+					}
+					"bRespec"
+					{
+						"type"	"bool"
+					}
+				}
+			}
 			"CPopulationManager::Update"
 			{
 				"signature"	"CPopulationManager::Update"
@@ -313,6 +362,32 @@
 					"bIsBonus"
 					{
 						"type"	"bool"
+					}
+				}
+			}
+			"CTFGameRules::CanUpgradeWithAttrib"
+			{
+				"signature"	"CTFGameRules::CanUpgradeWithAttrib"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"ignore"
+				"arguments"
+				{
+					"pPlayer"
+					{
+						"type"	"cbaseentity"
+					}
+					"iWeaponSlot"
+					{
+						"type"	"int"
+					}
+					"iAttribIndex"
+					{
+						"type"	"int"
+					}
+					"pUpgrade"
+					{
+						"type"	"cbaseentity"
 					}
 				}
 			}
@@ -519,6 +594,20 @@
 				"callconv"	"thiscall"
 				"return"	"void"
 				"this"		"entity"
+			}
+			"CTFGameRules::GetUpgradeTier"
+			{
+				"signature" "CTFGameRules::GetUpgradeTier"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"entity"
+				"arguments"
+				{
+					"iUpgrade"
+					{
+						"type"	"int"
+					}
+				}
 			}
 		}
 		"Addresses"

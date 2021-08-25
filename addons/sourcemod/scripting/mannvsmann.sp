@@ -554,11 +554,18 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 					int upgrade = kv.GetNum("Upgrade");
 					int count = kv.GetNum("count");
 
-					//Disposable Sentry
-					if (upgrade == 23 && count == 1)
+					if(IsBannedUpgrade(upgrade) && count > 0)
 					{
-						PrintHintText(client, "%t", "MvM_Upgrade_DisposableSentry");
+						PrintCenterText(client, "%T", "MvM_BannedUpgrade", client);
+						PrintToChat(client, "%T", "MvM_BannedUpgrade", client);
 					}
+					else if (upgrade == 23 && count == 1)
+					{
+						//Disposable Sentry
+						PrintCenterText(client, "%T", "MvM_Upgrade_DisposableSentry", client);
+					}
+
+					// PrintToServer("%N, upgrade: %d, count: %d", client, upgrade, count);
 				}
 			}
 			else if (strcmp(section, "MvM_UpgradesBegin") == 0)
