@@ -62,6 +62,7 @@ ConVar mvm_drop_revivemarker;
 ConVar mvm_enable_music;
 ConVar mvm_carteen_cooldown;
 ConVar mvm_allow_dropweapon;
+ConVar mvm_custom_upgrade;
 
 //DHooks
 TFTeam g_CurrencyPackTeam;
@@ -73,6 +74,8 @@ int g_OffsetCurrencyPackAmount;
 int g_OffsetRestoringCheckpoint;
 
 //Other globals
+Address g_MannVsMachineUpgrades = Address_Null;
+char g_strCustomUpgradePath[PLATFORM_MAX_PATH];
 ArrayList g_hCornerList;
 int g_BeamSprite, g_HaloSprite;
 Handle g_HudSync;
@@ -126,6 +129,9 @@ public void OnPluginStart()
 	mvm_enable_music = CreateConVar("mvm_enable_music", "1", "When set to 1, Mann vs. Machine music will play at the start and end of a round.");
 	mvm_carteen_cooldown = CreateConVar("mvm_carteen_cooldown", "30.0", "Cooldown time of carteen.", _, true, 0.0);
 	mvm_allow_dropweapon = CreateConVar("mvm_allow_dropweapon", "0", "When set to 1, drop player's weapon when player dead.");
+	mvm_custom_upgrade = CreateConVar("mvm_custom_upgrade", "", "Set custom upgrades file for stations.");
+
+	mvm_custom_upgrade.AddChangeHook(ConVarHook);
 
 	HookEntityOutput("team_round_timer", "On10SecRemain", EntityOutput_OnTimer10SecRemain);
 
@@ -159,6 +165,30 @@ public void OnPluginStart()
 		if (IsClientInGame(client))
 		{
 			OnClientPutInServer(client);
+		}
+	}
+}
+
+public void ConVarHook(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	char name[128];
+	convar.GetName(name, sizeof(name));
+
+	if(StrEqual(name, "mvm_custom_upgrade"))
+	{
+		strcopy(g_strCustomUpgradePath, PLATFORM_MAX_PATH, newValue);
+
+		if(g_strCustomUpgradePath[0] != '\0')
+		{
+			// FIXME: Not working on first map.
+			LoadStationStats(g_strCustomUpgradePath);
+
+			if(g_MannVsMachineUpgrades != Address_Null)
+			{
+				char F[PLATFORM_MAX_PATH];
+				Format(F, sizeof(F), "scripts/items/%s.txt", g_strCustomUpgradePath);
+				SDKCall_LoadUpgradesFileFromPath(F);
+			}
 		}
 	}
 }
@@ -201,10 +231,25 @@ public void OnPluginEnd()
 public void OnMapStart()
 {
 	PrecacheModel(UPGRADE_STATION_MODEL);
+	PrecacheModel(UPGRADE_SIGN_MODEL);
 	PrecacheSound(SOUND_CREDITS_UPDATED);
 
 	DHooks_HookGameRules();
 	PrecacheBeamPoint();
+
+	mvm_custom_upgrade.GetString(g_strCustomUpgradePath, PLATFORM_MAX_PATH);
+	if(g_strCustomUpgradePath[0] != '\0')
+	{
+		// FIXME: Not working on first map.
+		LoadStationStats(g_strCustomUpgradePath);
+
+		if(g_MannVsMachineUpgrades != Address_Null)
+		{
+			char F[PLATFORM_MAX_PATH];
+			Format(F, sizeof(F), "scripts/items/%s.txt", g_strCustomUpgradePath);
+			SDKCall_LoadUpgradesFileFromPath(F);
+		}
+	}
 
 	if(g_hCornerList != null)
 	{
@@ -553,17 +598,20 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 				{
 					int upgrade = kv.GetNum("Upgrade");
 					int count = kv.GetNum("count");
-
+/*
+					if (upgrade == 23 && count == 1)
+					{
+						//Disposable Sentry
+						PrintCenterText(client, "%T", "MvM_Upgrade_DisposableSentry", client);
+					}
+*/
+/*
 					if(IsBannedUpgrade(upgrade) && count > 0)
 					{
 						PrintCenterText(client, "%T", "MvM_BannedUpgrade", client);
 						PrintToChat(client, "%T", "MvM_BannedUpgrade", client);
 					}
-					else if (upgrade == 23 && count == 1)
-					{
-						//Disposable Sentry
-						PrintCenterText(client, "%T", "MvM_Upgrade_DisposableSentry", client);
-					}
+*/
 
 					// PrintToServer("%N, upgrade: %d, count: %d", client, upgrade, count);
 				}

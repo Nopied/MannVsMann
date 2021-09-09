@@ -155,6 +155,17 @@
 				"windows"	" "
 			}
 		}
+			"CMannVsMachineUpgradeManager::LevelInitPostEntity"
+			{
+				"linux"		"@_ZN28CMannVsMachineUpgradeManager19LevelInitPostEntityEv"
+				"windows"	" "
+			}
+			"CMannVsMachineUpgradeManager::LoadUpgradesFileFromPath"
+			{
+				"linux"		"@_ZN28CMannVsMachineUpgradeManager24LoadUpgradesFileFromPathEPKc"
+				"windows"	" "
+		}
+		}
 		"Offsets"
 		{
 			"CBaseEntity::GetBaseEntity"
@@ -608,6 +619,13 @@
 						"type"	"int"
 					}
 				}
+			}
+			"CMannVsMachineUpgradeManager::LevelInitPostEntity"
+			{
+				"signature" "CMannVsMachineUpgradeManager::LevelInitPostEntity"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"address"
 			}
 		}
 		"Addresses"
