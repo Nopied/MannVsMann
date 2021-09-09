@@ -3,6 +3,9 @@
 #endif
 #define _MVM_included
 
+static int g_IsMannVsMachineModeCount;
+static bool g_IsMannVsMachineModeState[8];
+
 // TODO: methodmap support
 
 /*
@@ -53,6 +56,24 @@ native void MVM_RemoveAllUpgrades(int client);
         Otherwise               Player will NOT be able to access to upgrade menu.
 */
 forward Action MVM_OnTouchedUpgradeStation(int upgradeStation, int client);
+
+stock bool IsMannVsMachineMode()
+{
+	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
+}
+
+stock void SetMannVsMachineMode(bool value)
+{
+    int count = ++g_IsMannVsMachineModeCount;
+    g_IsMannVsMachineModeState[count - 1] = IsMannVsMachineMode();
+    GameRules_SetProp("m_bPlayingMannVsMachine", value);
+}
+
+stock void ResetMannVsMachineMode()
+{
+    int count = g_IsMannVsMachineModeCount--;
+    GameRules_SetProp("m_bPlayingMannVsMachine", g_IsMannVsMachineModeState[count - 1]);
+}
 
 public SharedPlugin __pl_MVM=
 {

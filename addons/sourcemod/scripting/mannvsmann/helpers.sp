@@ -15,9 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-static int g_IsMannVsMachineModeCount;
-static bool g_IsMannVsMachineModeState[8];
-
 public void FloatToVector(float vector[3], float x, float z, float y)
 {
 	vector[0] = x, vector[1] = z, vector[2] = y;
@@ -77,21 +74,59 @@ int GetPlayerSharedOuter(Address playerShared)
 	Address outer = view_as<Address>(LoadFromAddress(playerShared + view_as<Address>(g_OffsetPlayerSharedOuter), NumberType_Int32));
 	return SDKCall_GetBaseEntity(outer);
 }
-
-bool IsMannVsMachineMode()
+/*
+stock int GetIndexOfAccountID(int id)
 {
-	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
+	char auth[32], idString[3][32];
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(!IsClientInGame(client) || IsFakeClient(client))
+			continue;
+
+		GetClientAuthId(client, AuthId_Steam3, auth, 32);
+		ExplodeString(auth, ":", idString, 3, 32);
+
+		if(StringToInt(idString[2]) == id)
+			return client;
+	}
+	return -1;
+}
+*/
+stock int CheckRoundState()
+{
+	switch(GameRules_GetRoundState())
+	{
+		case RoundState_Init, RoundState_Pregame:
+		{
+			return -1;
+		}
+		case RoundState_StartGame, RoundState_Preround:
+		{
+			return 0;
+		}
+		case RoundState_RoundRunning, RoundState_Stalemate:  //Oh Valve.
+		{
+			return 1;
+		}
+		default:
+		{
+			return 2;
+		}
+	}
 }
 
-void SetMannVsMachineMode(bool value)
+stock void LoadStationStats(char[] path)
 {
-	int count = ++g_IsMannVsMachineModeCount;
-	g_IsMannVsMachineModeState[count - 1] = IsMannVsMachineMode();
-	GameRules_SetProp("m_bPlayingMannVsMachine", value);
-}
+	char F[PLATFORM_MAX_PATH];
+	Format(F, sizeof(F), "scripts/items/%s.txt", path);
 
-void ResetMannVsMachineMode()
-{
-	int count = g_IsMannVsMachineModeCount--;
-	GameRules_SetProp("m_bPlayingMannVsMachine", g_IsMannVsMachineModeState[count - 1]);
+	PrecacheGeneric(F, true);
+	AddFileToDownloadsTable(F);
+
+	int edict = FindEntityByClassname(-1, "tf_gamerules");
+	if(edict == -1)	return;
+
+	Format(F, sizeof(F), "download/scripts/items/%s.txt", path);
+	SetVariantString(F);
+	AcceptEntityInput(edict, "SetCustomUpgradesFile");
 }
