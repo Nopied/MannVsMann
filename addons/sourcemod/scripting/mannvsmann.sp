@@ -263,6 +263,18 @@ public void OnMapStart()
 	}
 	g_hCornerList = new ArrayList();
 
+	if(g_hStationList != null)
+	{
+		for(int loop = 0; loop < g_hStationList.Length; loop++)
+		{
+			CTFUpgradeStation station = g_hStationList.Get(loop);
+			delete station;
+		}
+
+		delete g_hStationList;
+	}
+	g_hStationList = new ArrayList();
+
 	//An info_populator entity is required for a lot of MvM-related stuff (preserved entity)
 	CreateEntityByName("info_populator");
 
@@ -411,9 +423,15 @@ public void OnMapStart()
 
 			SDKHook(upgradestation, SDKHook_StartTouch, OnTouchUpgradeStation);
 			SDKHook(upgradestation, SDKHook_Touch, OnTouchUpgradeStation);
+			SDKHook(upgradestation, SDKHook_EndTouchPost, OnTouchUpgradeStation_End);
+
+			for(int column = 0; column < 2; column++)
+				origin[column] = minPos[column] + ((maxPos[column] - minPos[column]) * 0.5);
+			origin[2] = minPos[2];
+
+			g_hStationList.Push(new CTFUpgradeStation(upgradestation, origin));
 		}
 	}
-
 
 	// Delete all of them
 	for(int loop = 0; loop < rootCount; loop++)

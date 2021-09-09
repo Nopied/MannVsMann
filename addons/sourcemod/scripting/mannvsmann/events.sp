@@ -15,6 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#define UPGRADE_SIGN_MODEL	"models/props_mvm/mvm_upgrade_tools.mdl"
+
+ArrayList g_hStationList;
+
 void Events_Initialize()
 {
 	HookEvent("teamplay_broadcast_audio", Event_TeamplayBroadcastAudio, EventHookMode_Pre);
@@ -65,6 +69,14 @@ public void Event_TeamplayRoundWin(Event event, const char[] name, bool dontBroa
 	//NOTE: teamplay_round_start fires too late for us to reset player upgrades.
 	//Instead we hook this event to reset everything in a RoundRespawn hook.
 	g_ForceMapReset = event.GetBool("full_round") && mvm_reset_on_round_end.BoolValue;
+
+	for(int loop = 0; loop < g_hStationList.Length; loop++)
+	{
+		CTFUpgradeStation station = g_hStationList.Get(loop);
+
+		delete station.PropTimer;
+		station.PropTimer = null;
+	}
 }
 
 public void Event_TeamplayRestartRound(Event event, const char[] name, bool dontBroadcast)
@@ -110,6 +122,44 @@ public void Event_TeamplayRoundStart(Event event, const char[] name, bool dontBr
 	{
 		MvMPlayer(client).ReviveThinkCooldown = 0.0;
 	}
+
+	float pos[3];
+	for(int loop = 0; loop < g_hStationList.Length; loop++)
+	{
+		CTFUpgradeStation station = g_hStationList.Get(loop);
+		station.GetPos(pos);
+
+		int prop = CreateEntityByName("prop_physics_override");
+		if (IsValidEntity(prop))
+		{
+			// PrintToServer("prop: %d", prop);
+			station.Index = prop;
+			SetEntityModel(prop, UPGRADE_SIGN_MODEL);
+
+			SetEntProp(prop, Prop_Send, "m_CollisionGroup", 0);
+			SetEntProp(prop, Prop_Send, "m_usSolidFlags", 0x0004);
+			SetEntProp(prop, Prop_Send, "m_nSolidType", 0);
+
+			TeleportEntity(prop, pos, NULL_VECTOR, NULL_VECTOR);
+			DispatchSpawn(prop);
+
+			SetEntityMoveType(prop, MOVETYPE_NONE);
+			station.PropTimer =
+				CreateTimer(0.05, Timer_UpgradeLogo, station, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+		}
+	}
+}
+
+public Action Timer_UpgradeLogo(Handle timer, CTFUpgradeStation station)
+{
+	float angles[3];
+	int prop = station.Index;
+
+	GetEntPropVector(prop, Prop_Data, "m_angRotation", angles);
+	angles[1] += 1.8;
+
+	TeleportEntity(prop, NULL_VECTOR, angles, NULL_VECTOR);
+	return Plugin_Continue;
 }
 
 public void Event_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)

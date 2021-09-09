@@ -141,10 +141,14 @@ methodmap MvMTeam
 	}
 }
 
-enum CTFSpawnPoint_Items
+enum // CTFSpawnPoint_Items
 {
 	CTFSpawnPoint_Index = 0,
 	CTFSpawnPoint_Team,
+
+	CTFSpawnPoint_PosX,
+	CTFSpawnPoint_PosZ,
+	CTFSpawnPoint_PosY,
 
 	CTFSpawnPoint_Item_MAX
 };
@@ -182,6 +186,100 @@ methodmap CTFSpawnPoint < ArrayList
 		 {
 			 this.Set(view_as<int>(CTFSpawnPoint_Team), team);
 		 }
+	 }
+
+	 public void GetPos(float pos[3])
+	 {
+		int index;
+		for(int loop = CTFSpawnPoint_PosX; loop <= CTFSpawnPoint_PosY; loop++)
+		{
+			index = loop - CTFSpawnPoint_PosX;
+			pos[index] = this.Get(loop);
+		}
+	 }
+
+	 public void SetPos(float pos[3])
+	 {
+		int index;
+		for(int loop = CTFSpawnPoint_PosX; loop <= CTFSpawnPoint_PosY; loop++)
+		{
+			index = loop - CTFSpawnPoint_PosX;
+			this.Set(loop, pos[index]);
+		}
+	 }
+}
+
+enum // CTFUpgradeStation_Items
+{
+	CTFUpgradeStation_Index = 0,
+
+	CTFUpgradeStation_PosX,
+	CTFUpgradeStation_PosZ,
+	CTFUpgradeStation_PosY,
+
+	CTFUpgradeStation_PropTimer,
+
+	CTFUpgradeStation_Item_MAX
+};
+
+methodmap CTFUpgradeStation < ArrayList
+{
+	 public CTFUpgradeStation(int index, float pos[3])
+	 {
+		CTFUpgradeStation array =
+			view_as<CTFUpgradeStation>(new ArrayList(16, CTFUpgradeStation_Item_MAX));
+
+		array.Push(index);
+
+		array.Set(CTFUpgradeStation_PosX, pos[0]);
+		array.Set(CTFUpgradeStation_PosZ, pos[1]);
+		array.Set(CTFUpgradeStation_PosY, pos[2]);
+
+		return array;
+	 }
+
+	 property int Index
+	 {
+		 public get()
+		 {
+			 return this.Get(CTFUpgradeStation_Index);
+		 }
+		 public set(int index)
+		 {
+			 this.Set(CTFUpgradeStation_Index, index);
+		 }
+	 }
+
+	 property Handle PropTimer
+	 {
+		 public get()
+		 {
+			 return this.Get(CTFUpgradeStation_PropTimer);
+		 }
+		 public set(Handle propTimer)
+		 {
+			 this.Set(CTFUpgradeStation_PropTimer, propTimer);
+		 }
+	 }
+
+	 public void GetPos(float pos[3])
+	 {
+		int index;
+		for(int loop = CTFUpgradeStation_PosX; loop <= CTFUpgradeStation_PosY; loop++)
+		{
+			index = loop - CTFUpgradeStation_PosX;
+			pos[index] = this.Get(loop);
+		}
+	 }
+
+	 public void SetPos(float pos[3])
+	 {
+		int index;
+		for(int loop = CTFUpgradeStation_PosX; loop <= CTFUpgradeStation_PosY; loop++)
+		{
+			index = loop - CTFUpgradeStation_PosX;
+			this.Set(loop, pos[index]);
+		}
 	 }
 }
 
