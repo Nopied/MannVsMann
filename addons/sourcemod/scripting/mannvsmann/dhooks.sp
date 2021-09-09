@@ -48,7 +48,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CObjectSapper::ApplyRoboSapperEffects", DHookCallback_ApplyRoboSapperEffects_Pre, DHookCallback_ApplyRoboSapperEffects_Post);
 	CreateDynamicDetour(gamedata, "CTFPowerupBottle::AllowedToUse", _, DHookCallback_PowerupBottle_AllowedToUse_Post);
 	CreateDynamicDetour(gamedata, "CWeaponMedigun::HealTargetThink", DHookCallback_Medigun_HealTargetThink_Pre, DHookCallback_Medigun_HealTargetThink_Post);
-	// CreateDynamicDetour(gamedata, "CTFGameRules::GetUpgradeTier", DHookCallback_GameRules_GetUpgradeTier_Pre, DHookCallback_GameRules_GetUpgradeTier_Post);
+	CreateDynamicDetour(gamedata, "CWeaponMedigun::SubtractChargeAndUpdateDeployState", DHookCallback_Medigun_SubtractChargeAndUpdateDeployState_Pre);
 
 	g_DHookMyTouch = CreateDynamicHook(gamedata, "CCurrencyPack::MyTouch");
 	g_DHookComeToRest = CreateDynamicHook(gamedata, "CCurrencyPack::ComeToRest");
@@ -595,15 +595,17 @@ public MRESReturn DHookCallback_Medigun_HealTargetThink_Pre(int pThis)
 		healingTarget = GetEntPropEnt(pThis, Prop_Send, "m_hHealingTarget");
 
 	if(!IsPlayerAlive(owner) || (0 < healingTarget && healingTarget <= MaxClients))
-		return MRES_Ignored;
-
-	if(MvMPlayer(owner).ReviveThinkCooldown >= GetGameTime())
 	{
-		g_iHealthBeforeHeal = GetEntProp(healingTarget, Prop_Data, "m_iHealth");
 		return MRES_Ignored;
 	}
 
-	MvMPlayer(owner).ReviveThinkCooldown = GetGameTime() + 0.15;
+	g_iHealthBeforeHeal = GetEntProp(healingTarget, Prop_Data, "m_iHealth");
+	if(MvMPlayer(owner).ReviveThinkCooldown >= GetGameTime())
+	{
+		return MRES_Ignored;
+	}
+
+	// MvMPlayer(owner).ReviveThinkCooldown = GetGameTime() + 0.15;
 	return MRES_Ignored;
 }
 
@@ -614,11 +616,48 @@ public MRESReturn DHookCallback_Medigun_HealTargetThink_Post(int pThis)
 
 	if(pThis==-1)			return MRES_Ignored;
 
-	int healingTarget = GetEntPropEnt(pThis, Prop_Send, "m_hHealingTarget");
-	if(health >= 0)
+	int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwnerEntity"),
+		healingTarget = GetEntPropEnt(pThis, Prop_Send, "m_hHealingTarget"),
+		healed = GetEntProp(healingTarget, Prop_Data, "m_iHealth") - health;
+	bool isCharging = GetEntProp(pThis, Prop_Send, "m_bChargeRelease") > 0;
+
+	if(!IsPlayerAlive(owner) || (0 < healingTarget && healingTarget <= MaxClients))
+	{
+		return MRES_Ignored;
+	}
+
+	if(MvMPlayer(owner).ReviveThinkCooldown < GetGameTime())
+	{
+		// PrintToChatAll("%.3f, game time: %.3f, isCharging: %s", MvMPlayer(owner).ReviveThinkCooldown, GetGameTime(), isCharging ? "true" : "false");
+		MvMPlayer(owner).ReviveThinkCooldown = GetGameTime() + 0.15;
+	}
+	else
+	{
 		SetEntProp(healingTarget, Prop_Data, "m_iHealth", health);
+		return MRES_Ignored;
+	}
+
+	if(isCharging)
+		SetEntProp(healingTarget, Prop_Data, "m_iHealth", health + (healed * 3));
 
 	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_Medigun_SubtractChargeAndUpdateDeployState_Pre(int pThis, DHookParam params)
+{
+	if(pThis==-1)			return MRES_Ignored;
+
+	int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwnerEntity"),
+		healingTarget = GetEntPropEnt(pThis, Prop_Send, "m_hHealingTarget");
+	bool isCharging = GetEntProp(pThis, Prop_Send, "m_bChargeRelease") > 0;
+
+	if(!IsPlayerAlive(owner) || (-1 <= healingTarget && healingTarget <= MaxClients) || !isCharging)
+		return MRES_Ignored;
+
+	float flSubtractAmount = params.Get(1);
+	params.Set(1, flSubtractAmount * 4.0);
+
+	return MRES_ChangedOverride;
 }
 
 /*

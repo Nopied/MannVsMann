@@ -154,7 +154,11 @@
 				"linux"		"@_ZN12CTFGameRules14GetUpgradeTierEi"
 				"windows"	" "
 			}
-		}
+			"CWeaponMedigun::SubtractChargeAndUpdateDeployState"
+			{
+				"linux"		"@_ZN14CWeaponMedigun34SubtractChargeAndUpdateDeployStateEfb"
+				"windows"	" "
+			}
 			"CMannVsMachineUpgradeManager::LevelInitPostEntity"
 			{
 				"linux"		"@_ZN28CMannVsMachineUpgradeManager19LevelInitPostEntityEv"
@@ -164,7 +168,7 @@
 			{
 				"linux"		"@_ZN28CMannVsMachineUpgradeManager24LoadUpgradesFileFromPathEPKc"
 				"windows"	" "
-		}
+			}
 		}
 		"Offsets"
 		{
@@ -617,6 +621,24 @@
 					"iUpgrade"
 					{
 						"type"	"int"
+					}
+				}
+			}
+			"CWeaponMedigun::SubtractChargeAndUpdateDeployState"
+			{
+				"signature" "CWeaponMedigun::SubtractChargeAndUpdateDeployState"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"flSubtractAmount"
+					{
+						"type"	"float"
+					}
+					"bForceDrain"
+					{
+						"type"	"bool"
 					}
 				}
 			}
