@@ -402,7 +402,7 @@
 					}
 					"pUpgrade"
 					{
-						"type"	"cbaseentity"
+						"type"	"objectptr"
 					}
 				}
 			}
