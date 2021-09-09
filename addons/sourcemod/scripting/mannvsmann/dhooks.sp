@@ -581,7 +581,18 @@ public MRESReturn DHookCallback_PowerupBottle_AllowedToUse_Post(int pThis, DHook
 	}
 
 	ret.Value = true;
-	MvMPlayer(owner).CarteenCooldown = GetGameTime() + mvm_carteen_cooldown.FloatValue;
+	float multiplier = 1.0;
+	Address address;
+
+	address = TF2Attrib_GetByName(pThis, "ubercharge");
+	if(address != Address_Null && TF2Attrib_GetValue(address) > 0.0)
+		multiplier += 0.5;
+
+	address = TF2Attrib_GetByName(pThis, "recall");
+	if(address != Address_Null && TF2Attrib_GetValue(address) > 0.0)
+		multiplier += 1.0;
+
+	MvMPlayer(owner).CarteenCooldown = GetGameTime() + (mvm_carteen_cooldown.FloatValue * multiplier);
 
 	return MRES_ChangedOverride;
 }
