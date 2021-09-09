@@ -437,9 +437,11 @@ public void OnMapStart()
 	CreateTimer(1.0, Timer_BeamPoint, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 }
 
+bool g_bIsBlockUpgrade[MAXPLAYERS+1];
 public Action OnTouchUpgradeStation(int upgradeStation, int other)
 {
-	if(!IsValidClient(other))		return Plugin_Continue;
+	if(!IsValidClient(other))
+		return Plugin_Continue;
 
 	Action action = Plugin_Continue;
 	Call_StartForward(g_onTouchedUpgradeStation);
@@ -450,7 +452,29 @@ public Action OnTouchUpgradeStation(int upgradeStation, int other)
 	if(action != Plugin_Continue)
 		return Plugin_Handled;
 
+	if(g_bIsBlockUpgrade[other])
+		return Plugin_Handled;
+
+	int buttons = GetClientButtons(other);
+	if((buttons & IN_DUCK) > 0)
+	{
+		SetEntProp(other, Prop_Send, "m_bInUpgradeZone", 0);
+
+		if((buttons & IN_JUMP) > 0 && CheckRoundState() == 1)
+			g_bIsBlockUpgrade[other] = true;
+
+		return Plugin_Handled;
+	}
+
 	return Plugin_Continue;
+}
+
+public void OnTouchUpgradeStation_End(int upgradeStation, int other)
+{
+	if(!IsValidClient(other))
+		return;
+
+	g_bIsBlockUpgrade[other] = false;
 }
 
 public Action Timer_BeamPoint(Handle timer)
