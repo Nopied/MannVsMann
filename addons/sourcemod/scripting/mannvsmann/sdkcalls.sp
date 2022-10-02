@@ -27,7 +27,6 @@ static Handle g_SDKCallGetBaseEntity;
 static Handle g_SDKCallShouldSwitchTeams;
 static Handle g_SDKCallShouldScrambleTeams;
 static Handle g_SDKCallGetNextRespawnWave;
-static Handle g_SDKCallLoadUpgradesFileFromPath;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -43,7 +42,6 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallShouldSwitchTeams = PrepSDKCall_ShouldSwitchTeams(gamedata);
 	g_SDKCallShouldScrambleTeams = PrepSDKCall_ShouldScrambleTeams(gamedata);
 	g_SDKCallGetNextRespawnWave = PrepSDKCall_GetNextRespawnWave(gamedata);
-	g_SDKCallLoadUpgradesFileFromPath = PrepSDKCall_LoadUpgradesFileFromPath(gamedata);
 }
 
 Handle PrepSDKCall_ResetMap(GameData gamedata)
@@ -211,19 +209,6 @@ Handle PrepSDKCall_GetNextRespawnWave(GameData gamedata)
 	return call;
 }
 
-Handle PrepSDKCall_LoadUpgradesFileFromPath(GameData gamedata)
-{
-	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CMannVsMachineUpgradeManager::LoadUpgradesFileFromPath");
-	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
-
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogMessage("Failed to create SDK call: CMannVsMachineUpgradeManager::LoadUpgradesFileFromPath");
-
-	return call;
-}
-
 void SDKCall_ResetMap(int populator)
 {
 	if (g_SDKCallResetMap)
@@ -310,10 +295,4 @@ float SDKCall_GetNextRespawnWave(int team, int player)
 		return SDKCall(g_SDKCallGetNextRespawnWave, team, player);
 
 	return 0.0;
-}
-
-void SDKCall_LoadUpgradesFileFromPath(char[] path)
-{
-	if(g_SDKCallLoadUpgradesFileFromPath)
-		SDKCall(g_SDKCallLoadUpgradesFileFromPath, g_MannVsMachineUpgrades, path);
 }

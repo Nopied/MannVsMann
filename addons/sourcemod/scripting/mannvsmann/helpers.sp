@@ -63,6 +63,24 @@ void TF2_SetTeam(int entity, TFTeam team)
 	SetEntProp(entity, Prop_Send, "m_iTeamNum", team);
 }
 
+int GetAlivePlayers(int team, bool includeDead = false)
+{
+	int count = 0;
+	for(int client = 1; client <= MaxClients; client++)
+	{
+		if(!IsClientInGame(client))
+			continue;
+
+		if(GetClientTeam(client) == team)
+		{
+			if((!includeDead && IsPlayerAlive(client)) || includeDead)
+				count++;
+		}
+	}
+
+	return count;
+}
+
 Address GetPlayerShared(int client)
 {
 	Address offset = view_as<Address>(GetEntSendPropOffs(client, "m_Shared", true));
@@ -115,18 +133,35 @@ stock int CheckRoundState()
 	}
 }
 
-stock void LoadStationStats(char[] path)
+void SetCustomUpgradesFile(const char[] path)
 {
-	char F[PLATFORM_MAX_PATH];
-	Format(F, sizeof(F), "scripts/items/%s.txt", path);
+	if (FileExists(path, true, "MOD"))
+	{
+		AddFileToDownloadsTable(path);
 
-	PrecacheGeneric(F, true);
-	AddFileToDownloadsTable(F);
+		int gamerules = FindEntityByClassname(MaxClients + 1, "tf_gamerules");
+		if (gamerules != -1)
+		{
+			//Set the custom upgrades file for the server
+			SetVariantString(path);
+			AcceptEntityInput(gamerules, "SetCustomUpgradesFile");
 
-	int edict = FindEntityByClassname(-1, "tf_gamerules");
-	if(edict == -1)	return;
+			//Set the custom upgrades file for the client without the server re-parsing it
+			char downloadPath[PLATFORM_MAX_PATH];
+			Format(downloadPath, sizeof(downloadPath), "download/%s", path);
+			GameRules_SetPropString("m_pszCustomUpgradesFile", downloadPath);
 
-	Format(F, sizeof(F), "download/scripts/items/%s.txt", path);
-	SetVariantString(F);
-	AcceptEntityInput(edict, "SetCustomUpgradesFile");
+			//Tell the client the upgrades file has changed
+			Event event = CreateEvent("upgrades_file_changed");
+			if (event)
+			{
+				event.SetString("path", downloadPath);
+				event.Fire();
+			}
+		}
+	}
+	else
+	{
+		LogError("Custom upgrades file '%s' does not exist", path);
+	}
 }

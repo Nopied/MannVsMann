@@ -28,9 +28,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION	"1.0.0"
-
-#define TF_MAXPLAYERS	33
+#define PLUGIN_VERSION	"1.2.0"
 
 #define MEDIGUN_CHARGE_INVULN	0
 #define LOADOUT_POSITION_ACTION	9
@@ -53,6 +51,7 @@ enum CurrencyRewards
 //ConVars
 ConVar mvm_starting_currency;
 ConVar mvm_currency_rewards_player_killed;
+ConVar mvm_currency_death_penalty;
 ConVar mvm_currency_rewards_player_count_bonus;
 ConVar mvm_reset_on_round_end;
 ConVar mvm_spawn_protection;
@@ -62,7 +61,9 @@ ConVar mvm_drop_revivemarker;
 ConVar mvm_enable_music;
 ConVar mvm_carteen_cooldown;
 ConVar mvm_allow_dropweapon;
-ConVar mvm_custom_upgrade;
+ConVar mvm_custom_upgrades_file;
+ConVar mvm_block_using_nav;
+ConVar mvm_force_currency_victim_team;
 
 //DHooks
 TFTeam g_CurrencyPackTeam;
@@ -74,12 +75,11 @@ int g_OffsetCurrencyPackAmount;
 int g_OffsetRestoringCheckpoint;
 
 //Other globals
-Address g_MannVsMachineUpgrades = Address_Null;
-char g_strCustomUpgradePath[PLATFORM_MAX_PATH];
-ArrayList g_hCornerList;
-int g_BeamSprite, g_HaloSprite;
+// ArrayList g_hCornerList;
+// int g_BeamSprite, g_HaloSprite;
 Handle g_HudSync;
 Handle g_onTouchedUpgradeStation;
+Handle g_onTouchedMoney;
 bool g_ForceMapReset;
 
 #include "mannvsmann/methodmaps.sp"
@@ -105,6 +105,7 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	g_onTouchedUpgradeStation = CreateGlobalForward("MVM_OnTouchedUpgradeStation", ET_Hook, Param_Cell, Param_Cell); // upgradeStation, client
+	g_onTouchedMoney = CreateGlobalForward("MVM_OnTouchedMoney", ET_Hook, Param_Cell, Param_Cell); // money, client
 
 	// mannvsmann/natives.sp
 	Natives_Initialize();
@@ -120,6 +121,7 @@ public void OnPluginStart()
 	CreateConVar("mvm_version", PLUGIN_VERSION, "Mann vs. Mann plugin version", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	mvm_starting_currency = CreateConVar("mvm_starting_currency", "800", "Number of credits that players get at the start of a match.", _, true, 0.0);
 	mvm_currency_rewards_player_killed = CreateConVar("mvm_currency_rewards_player_killed", "15", "The fixed number of credits dropped by players on death.");
+	mvm_currency_death_penalty = CreateConVar("mvm_currency_death_penalty", "1", "Drop all of dead player's money.");
 	mvm_currency_rewards_player_count_bonus = CreateConVar("mvm_currency_rewards_player_count_bonus", "2.0", "Multiplier to dropped currency that gradually increases up to this value until all player slots have been filled.", _, true, 1.0);
 	mvm_reset_on_round_end = CreateConVar("mvm_reset_on_round_end", "1", "When set to 1, player upgrades and cash will reset when a full round has been played.");
 	mvm_spawn_protection = CreateConVar("mvm_spawn_protection", "0", "When set to 1, players are granted ubercharge while they leave their spawn.");
@@ -129,9 +131,11 @@ public void OnPluginStart()
 	mvm_enable_music = CreateConVar("mvm_enable_music", "1", "When set to 1, Mann vs. Machine music will play at the start and end of a round.");
 	mvm_carteen_cooldown = CreateConVar("mvm_carteen_cooldown", "30.0", "Cooldown time of carteen.", _, true, 0.0);
 	mvm_allow_dropweapon = CreateConVar("mvm_allow_dropweapon", "0", "When set to 1, drop player's weapon when player dead.");
-	mvm_custom_upgrade = CreateConVar("mvm_custom_upgrade", "", "Set custom upgrades file for stations.");
+	mvm_custom_upgrades_file = CreateConVar("mvm_custom_upgrades_file", "", "Custom upgrade menu file to use, set to an empty string to use the default.");
+	mvm_block_using_nav = CreateConVar("mvm_block_using_nav", "1", "If the server using custom map, currency will be removed when server has no nav mash file of current map.");
+	mvm_force_currency_victim_team = CreateConVar("mvm_force_currency_victim_team", "2", "Force set the currency's team, which will be seen to the victim's team. 2 - red, 3 - blue");
 
-	mvm_custom_upgrade.AddChangeHook(ConVarHook);
+	mvm_custom_upgrades_file.AddChangeHook(ConVarChanged_CustomUpgradesFile);
 
 	HookEntityOutput("team_round_timer", "On10SecRemain", EntityOutput_OnTimer10SecRemain);
 
@@ -169,26 +173,20 @@ public void OnPluginStart()
 	}
 }
 
-public void ConVarHook(ConVar convar, const char[] oldValue, const char[] newValue)
+public void ConVarChanged_CustomUpgradesFile(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-	char name[128];
-	convar.GetName(name, sizeof(name));
-
-	if(StrEqual(name, "mvm_custom_upgrade"))
+	if (newValue[0] != '\0')
 	{
-		strcopy(g_strCustomUpgradePath, PLATFORM_MAX_PATH, newValue);
-
-		if(g_strCustomUpgradePath[0] != '\0')
+		SetCustomUpgradesFile(newValue);
+	}
+	else
+	{
+		int gamerules = FindEntityByClassname(MaxClients + 1, "tf_gamerules");
+		if (gamerules != -1)
 		{
-			// FIXME: Not working on first map.
-			LoadStationStats(g_strCustomUpgradePath);
-
-			if(g_MannVsMachineUpgrades != Address_Null)
-			{
-				char F[PLATFORM_MAX_PATH];
-				Format(F, sizeof(F), "scripts/items/%s.txt", g_strCustomUpgradePath);
-				SDKCall_LoadUpgradesFileFromPath(F);
-			}
+			//Reset to the default upgrades file
+			SetVariantString("scripts/items/mvm_upgrades.txt");
+			AcceptEntityInput(gamerules, "SetCustomUpgradesFile");
 		}
 	}
 }
@@ -235,22 +233,18 @@ public void OnMapStart()
 	PrecacheSound(SOUND_CREDITS_UPDATED);
 
 	DHooks_HookGameRules();
-	PrecacheBeamPoint();
+	// PrecacheBeamPoint();
 
-	mvm_custom_upgrade.GetString(g_strCustomUpgradePath, PLATFORM_MAX_PATH);
-	if(g_strCustomUpgradePath[0] != '\0')
+	DispatchSpawn(CreateEntityByName("func_upgradestation"));
+
+	//Set custom upgrades file on level init
+	char path[PLATFORM_MAX_PATH];
+	mvm_custom_upgrades_file.GetString(path, sizeof(path));
+	if (path[0] != '\0')
 	{
-		// FIXME: Not working on first map.
-		LoadStationStats(g_strCustomUpgradePath);
-
-		if(g_MannVsMachineUpgrades != Address_Null)
-		{
-			char F[PLATFORM_MAX_PATH];
-			Format(F, sizeof(F), "scripts/items/%s.txt", g_strCustomUpgradePath);
-			SDKCall_LoadUpgradesFileFromPath(F);
-		}
+		SetCustomUpgradesFile(path);
 	}
-
+/*
 	if(g_hCornerList != null)
 	{
 		for(int loop = 0; loop < g_hCornerList.Length; loop++)
@@ -274,16 +268,13 @@ public void OnMapStart()
 		delete g_hStationList;
 	}
 	g_hStationList = new ArrayList();
-
+*/
 	//An info_populator entity is required for a lot of MvM-related stuff (preserved entity)
 	CreateEntityByName("info_populator");
 
 	//Create upgrade stations (preserved entity)
 
-	float previousPos[3], currentPos[3];
-	int spawnPoint = MaxClients + 1;
-	int roots[32], rootCount = 0, team;
-	bool rootExist;
+
 /*
 	int regenerate = MaxClients + 1;
 	while ((regenerate = FindEntityByClassname(regenerate, "func_regenerate")) != -1)
@@ -298,23 +289,28 @@ public void OnMapStart()
 
 	}
 */
+/*
+float previousPos[3], currentPos[3];
+int spawnPoint = MaxClients + 1;
+int roots[32], rootCount = 0, team;
+bool rootExist;
 	while ((spawnPoint = FindEntityByClassname(spawnPoint, "info_player_teamspawn")) != -1)
 	{
-		/*
-			Gathering vector of spawn point.
-			Rules for connecting in each of spawn point:
-				 - Two of them's distance <= 400
-				 - Two of them can spawn same team (exclude 'Both')
-		*/
+
+//			Gathering vector of spawn point.
+//			Rules for connecting in each of spawn point:
+//				 - Two of them's distance <= 400
+//				 - Two of them can spawn same team (exclude 'Both')
+
 		if((team = GetEntProp(spawnPoint, Prop_Send, "m_iTeamNum")) <= 1)
 			continue;
 
 		rootExist = false;
 		GetEntPropVector(spawnPoint, Prop_Send, "m_vecOrigin", currentPos);
-/*
-		LogMessage("[ent %d] spawnPoint (%.1f, %.1f, %.1f)",
-		spawnPoint, currentPos[0], currentPos[1], currentPos[2]);
-*/
+
+//		LogMessage("[ent %d] spawnPoint (%.1f, %.1f, %.1f)",
+//		spawnPoint, currentPos[0], currentPos[1], currentPos[2]);
+
 		for(int loop = 0; loop < rootCount; loop++)
 		{
 			ArrayList array = view_as<ArrayList>(roots[loop]);
@@ -323,22 +319,22 @@ public void OnMapStart()
 			{
 				CTFSpawnPoint previous = array.Get(search);
 				GetEntPropVector(previous.Index, Prop_Send, "m_vecOrigin", previousPos);
-/*
-				LogMessage("[%d - %d] %d's currentPos (%.1f %.1f %.1f) | %.1f | previousPos (%.1f %.1f %.1f)",
-				loop, search, spawnPoint,
-				currentPos[0], currentPos[1], currentPos[2], GetVectorDistance(currentPos, previousPos),
-				previousPos[0], previousPos[1], previousPos[2]);
-*/
+
+//				LogMessage("[%d - %d] %d's currentPos (%.1f %.1f %.1f) | %.1f | previousPos (%.1f %.1f %.1f)",
+//				loop, search, spawnPoint,
+//				currentPos[0], currentPos[1], currentPos[2], GetVectorDistance(currentPos, previousPos),
+//				previousPos[0], previousPos[1], previousPos[2]);
+
 				if(previous.Team != team) continue;
 
 				if(GetVectorDistance(currentPos, previousPos) <= 400.0)
 				{
 					array.Push(new CTFSpawnPoint(spawnPoint, team));
 					rootExist = true;
-/*
-					LogMessage("[%d - %d] Created leaf for %d",
-					loop, search, spawnPoint);
-*/
+
+//					LogMessage("[%d - %d] Created leaf for %d",
+//					loop, search, spawnPoint);
+
 					break;
 				}
 			}
@@ -352,10 +348,9 @@ public void OnMapStart()
 			ArrayList tempArray = new ArrayList();
 			roots[rootCount++] = view_as<int>(tempArray);
 			tempArray.Push(view_as<int>(new CTFSpawnPoint(spawnPoint, team)));
-/*
-			LogMessage("[%d] Created root for %d",
-			rootCount - 1, spawnPoint);
-*/
+
+//			LogMessage("[%d] Created root for %d",
+//			rootCount - 1, spawnPoint);
 		}
 	}
 
@@ -400,16 +395,16 @@ public void OnMapStart()
 		FloatToVector(startPos, minPos[0], maxPos[1], minPos[2]);
 		FloatToVector(endPos, maxPos[0], maxPos[1], minPos[2]);
 		g_hCornerList.Push(new CornerList(startPos, endPos));
-/*
-		LogMessage("[%d] X(min: %.1f max: %.1f), Z(min: %.1f max: %.1f)",
-		loop, minX, maxX, minZ, maxZ);
-*/
+
+//		LogMessage("[%d] X(min: %.1f max: %.1f), Z(min: %.1f max: %.1f)",
+//			loop, minX, maxX, minZ, maxZ);
+
 		float origin[3] = {0.0, 0.0, 0.0};
 		maxPos[2] += 100.0;
-/*
- 		LogMessage("[%d] min(%.1f, %.1f, %.1f), max(%.1f, %.1f, %.1f)",
-		loop, minPos[0], minPos[1], minPos[2], maxPos[0], maxPos[1], maxPos[2]);
-*/
+
+// 		LogMessage("[%d] min(%.1f, %.1f, %.1f), max(%.1f, %.1f, %.1f)",
+//		loop, minPos[0], minPos[1], minPos[2], maxPos[0], maxPos[1], maxPos[2]);
+
 		int upgradestation = CreateEntityByName("func_upgradestation");
 		if (IsValidEntity(upgradestation) && DispatchSpawn(upgradestation))
 		{
@@ -441,11 +436,11 @@ public void OnMapStart()
 		for(int search = 0; search < array.Length; search++)
 		{
 			CTFSpawnPoint temp = array.Get(search);
-/*
-			GetEntPropVector(temp.Index, Prop_Send, "m_vecOrigin", previousPos);
-			LogMessage("[%d - %d] %d (%.1f, %.1f)",
-			loop, search, temp.Index, previousPos[0], previousPos[1]);
-*/
+
+//			GetEntPropVector(temp.Index, Prop_Send, "m_vecOrigin", previousPos);
+//			LogMessage("[%d - %d] %d (%.1f, %.1f)",
+//			loop, search, temp.Index, previousPos[0], previousPos[1]);
+
 			delete temp;
 		}
 
@@ -453,6 +448,7 @@ public void OnMapStart()
 	}
 
 	CreateTimer(1.0, Timer_BeamPoint, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+*/
 }
 
 bool g_bIsBlockUpgrade[MAXPLAYERS+1];
@@ -461,6 +457,13 @@ public Action OnTouchUpgradeStation(int upgradeStation, int other)
 	if(!IsValidClient(other))
 		return Plugin_Continue;
 
+	// Prevents after stun
+	if(TF2_IsPlayerInCondition(other, TFCond_Dazed))
+	{
+		SetEntProp(other, Prop_Send, "m_bInUpgradeZone", 0);
+		return Plugin_Handled;
+	}
+
 	Action action = Plugin_Continue;
 	Call_StartForward(g_onTouchedUpgradeStation);
 	Call_PushCell(upgradeStation);
@@ -468,10 +471,16 @@ public Action OnTouchUpgradeStation(int upgradeStation, int other)
 	Call_Finish(action);
 
 	if(action != Plugin_Continue)
+	{
+		SetEntProp(other, Prop_Send, "m_bInUpgradeZone", 0);
 		return Plugin_Handled;
-
-	if(g_bIsBlockUpgrade[other])
+	}
+/*
+	if(action != Plugin_Continue || g_bIsBlockUpgrade[other])
+	{
+		SetEntProp(other, Prop_Send, "m_bInUpgradeZone", 0);
 		return Plugin_Handled;
+	}
 
 	int buttons = GetClientButtons(other);
 	if((buttons & IN_DUCK) > 0)
@@ -483,17 +492,20 @@ public Action OnTouchUpgradeStation(int upgradeStation, int other)
 
 		return Plugin_Handled;
 	}
-
+*/
 	return Plugin_Continue;
 }
 
+/*
 public void OnTouchUpgradeStation_End(int upgradeStation, int other)
 {
 	if(!IsValidClient(other))
 		return;
 
 	g_bIsBlockUpgrade[other] = false;
+	SetEntProp(other, Prop_Send, "m_bInUpgradeZone", 0);
 }
+
 
 public Action Timer_BeamPoint(Handle timer)
 {
@@ -534,6 +546,7 @@ void PrecacheBeamPoint()
 
     delete gameConfig;
 }
+*/
 
 public void OnClientPutInServer(int client)
 {
@@ -603,7 +616,7 @@ public void OnEntityDestroyed(int entity)
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
-	if (buttons & IN_ATTACK2)
+	if(buttons & IN_ATTACK2)
 	{
 		char name[32];
 		GetClientWeapon(client, name, sizeof(name));
@@ -614,6 +627,19 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			SetMannVsMachineMode(true);
 		}
 	}
+
+
+	if(GetEntProp(client, Prop_Send, "m_bInUpgradeZone") > 0)
+	{
+		int currentWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+
+		// PrintToChatAll("m_nInspectStage = %d", GetEntProp(currentWeapon, Prop_Send, "m_nInspectStage"));
+		SetEntProp(currentWeapon, Prop_Send, "m_nInspectStage", 1);
+		buttons &= ~IN_RELOAD;
+		return Plugin_Changed;
+	}
+
+	return Plugin_Continue;
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
@@ -629,36 +655,37 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 	char section[32];
 	if (kv.GetSectionName(section, sizeof(section)))
 	{
+		// PrintToChat(client, "%s", section);
 		if (strncmp(section, "MvM_", 4, false) == 0)
 		{
 			//Enable MvM for client commands to be processed in CTFGameRules::ClientCommandKeyValues
 			SetMannVsMachineMode(true);
-
+/*
 			if (strcmp(section, "MVM_Upgrade") == 0)
 			{
 				if (kv.JumpToKey("Upgrade"))
 				{
 					int upgrade = kv.GetNum("Upgrade");
 					int count = kv.GetNum("count");
-/*
+
 					if (upgrade == 23 && count == 1)
 					{
 						//Disposable Sentry
 						PrintCenterText(client, "%T", "MvM_Upgrade_DisposableSentry", client);
 					}
-*/
-/*
+
+
 					if(IsBannedUpgrade(upgrade) && count > 0)
 					{
 						PrintCenterText(client, "%T", "MvM_BannedUpgrade", client);
 						PrintToChat(client, "%T", "MvM_BannedUpgrade", client);
 					}
-*/
 
 					// PrintToServer("%N, upgrade: %d, count: %d", client, upgrade, count);
 				}
 			}
-			else if (strcmp(section, "MvM_UpgradesBegin") == 0)
+*/
+			if (strcmp(section, "MvM_UpgradesBegin") == 0)
 			{
 				if(mvm_disable_respec_menu.BoolValue)	return Plugin_Continue;
 
@@ -682,6 +709,7 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 				//Enable upgrade voice lines
 				SetVariantString("IsMvMDefender:1");
 				AcceptEntityInput(client, "AddContext");
+				SetEntProp(client, Prop_Send, "m_bInUpgradeZone", 0);
 
 				//Cancel and reset refund menu
 				Menu menu = MvMPlayer(client).RespecMenu;
@@ -720,6 +748,15 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 					return Plugin_Handled;
 				}
 			}
+		}
+		else if(strcmp(section, "+inspect_server") == 0)
+		{
+			if(OnTouchUpgradeStation(-1, client) == Plugin_Continue)
+				SetEntProp(client, Prop_Send, "m_bInUpgradeZone", 1);
+		}
+		else if(strcmp(section, "-inspect_server") == 0)
+		{
+			SetEntProp(client, Prop_Send, "m_bInUpgradeZone", 0);
 		}
 	}
 

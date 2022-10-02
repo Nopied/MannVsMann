@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-static int g_PlayerTeamCount[TF_MAXPLAYERS + 1];
-static TFTeam g_PlayerTeam[TF_MAXPLAYERS + 1][8];
-static Menu g_PlayerRespecMenu[TF_MAXPLAYERS + 1];
+static int g_PlayerTeamCount[MAXPLAYERS + 1];
+static TFTeam g_PlayerTeam[MAXPLAYERS + 1][8];
+static Menu g_PlayerRespecMenu[MAXPLAYERS + 1];
 static float g_flPlayerCarteenCooldown[MAXPLAYERS+1];
 static float g_flReviveThinkCooldown[MAXPLAYERS+1];
 

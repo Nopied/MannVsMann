@@ -57,6 +57,19 @@ native void MVM_RemoveAllUpgrades(int client);
 */
 forward Action MVM_OnTouchedUpgradeStation(int upgradeStation, int client);
 
+/*
+    Called when player starting touch or touching the currency
+
+    @param upgradeStation       currency's index
+    @param client               player's index
+
+    @return
+        Plugin_Continue         Player will be able to access to currency.
+        Plugin_Changed          Overwrite result.
+        Otherwise               Player will NOT be able to access to currency.
+*/
+forward Action MVM_OnTouchedMoney(int money, int client);
+
 stock bool IsMannVsMachineMode()
 {
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));

@@ -28,6 +28,7 @@ Forked by Nopied, for personal server use only.
     - Money Pickups
     - Buybacks
     - Revive Markers
+    - Support for custom upgrade files
     - ...and much more
 - Compatible with any map that has a resupply locker
 - Configurable using plugin ConVars

@@ -26,9 +26,12 @@ static DynamicHook g_DHookRoundRespawn;
 static RoundState g_PreHookRoundState;
 static TFTeam g_PreHookTeam;	//Note: For clients, use the MvMPlayer methodmap
 
+//Hook some functions
+static bool g_bComeToRest = false;
+
 void DHooks_Initialize(GameData gamedata)
 {
-	CreateDynamicDetour(gamedata, "CMannVsMachineUpgradeManager::LevelInitPostEntity", _, DHookCallback_LevelInitPostEntity_Post);
+	CreateDynamicDetour(gamedata, "CNavMesh::GetNavArea", DHookCallback_GetNavArea_Pre);
 	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_PopulationManagerUpdate_Pre, _);
 	CreateDynamicDetour(gamedata, "CPopulationManager::ResetMap", DHookCallback_PopulationManagerResetMap_Pre, DHookCallback_PopulationManagerResetMap_Post);
 	CreateDynamicDetour(gamedata, "CTFGameRules::IsQuickBuildTime", DHookCallback_IsQuickBuildTime_Pre, DHookCallback_IsQuickBuildTime_Post);
@@ -122,10 +125,16 @@ static DynamicHook CreateDynamicHook(GameData gamedata, const char[] name)
 	return hook;
 }
 
-public MRESReturn DHookCallback_LevelInitPostEntity_Post(Address address)
+public MRESReturn DHookCallback_GetNavArea_Pre(DHookReturn ret)
 {
-	g_MannVsMachineUpgrades = address;
-	// LogMessage("Loaded g_MannVsMachineUpgrades = %X", g_MannVsMachineUpgrades);
+	if(mvm_block_using_nav.BoolValue && g_bComeToRest)
+	{
+		// Just not return NULL.
+		ret.Value = 1;
+		return MRES_Supercede;
+	}
+
+	g_bComeToRest = false;
 	return MRES_Ignored;
 }
 
@@ -466,6 +475,8 @@ public MRESReturn DHookCallback_ComeToRest_Pre(int currencypack)
 
 	//Set the currency pack team for distribution
 	g_CurrencyPackTeam = TF2_GetTeam(currencypack);
+
+	g_bComeToRest = true;
 }
 
 public MRESReturn DHookCallback_ComeToRest_Post()
@@ -475,11 +486,32 @@ public MRESReturn DHookCallback_ComeToRest_Post()
 	g_CurrencyPackTeam = TFTeam_Invalid;
 }
 
-public MRESReturn DHookCallback_ValidTouch_Pre()
+public MRESReturn DHookCallback_ValidTouch_Pre(int pThis, DHookReturn ret, DHookParam params)
 {
 	//MvM invaders are not allowed to collect money
 	//We are disabling MvM instead of swapping teams because ValidTouch also checks the player's team against the currency pack's team
 	SetMannVsMachineMode(false);
+
+	int touchedPlayer = params.Get(1);
+	Action action = Plugin_Continue;
+
+	Call_StartForward(g_onTouchedMoney);
+	Call_PushCell(pThis);
+	Call_PushCell(touchedPlayer);
+	Call_Finish(action);
+
+	if(action == Plugin_Changed)
+	{
+		ret.Value = true;
+		return MRES_Supercede;
+	}
+	else if(action == Plugin_Handled || action == Plugin_Stop)
+	{
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ValidTouch_Post()
@@ -581,6 +613,7 @@ public MRESReturn DHookCallback_PowerupBottle_AllowedToUse_Post(int pThis, DHook
 	}
 
 	ret.Value = true;
+/*
 	float multiplier = 1.0;
 	Address address;
 
@@ -591,8 +624,8 @@ public MRESReturn DHookCallback_PowerupBottle_AllowedToUse_Post(int pThis, DHook
 	address = TF2Attrib_GetByName(pThis, "recall");
 	if(address != Address_Null && TF2Attrib_GetValue(address) > 0.0)
 		multiplier += 1.0;
-
-	MvMPlayer(owner).CarteenCooldown = GetGameTime() + (mvm_carteen_cooldown.FloatValue * multiplier);
+*/
+	MvMPlayer(owner).CarteenCooldown = GetGameTime() + mvm_carteen_cooldown.FloatValue;
 
 	return MRES_ChangedOverride;
 }
@@ -605,10 +638,12 @@ public MRESReturn DHookCallback_Medigun_HealTargetThink_Pre(int pThis)
 	int owner = GetEntPropEnt(pThis, Prop_Send, "m_hOwnerEntity"),
 		healingTarget = GetEntPropEnt(pThis, Prop_Send, "m_hHealingTarget");
 
-	if(!IsPlayerAlive(owner) || (0 < healingTarget && healingTarget <= MaxClients))
-	{
+	if(!IsValidEntity(healingTarget))		return MRES_Ignored;
+
+	char classname[64];
+	GetEntityClassname(healingTarget, classname, sizeof(classname));
+	if(!IsPlayerAlive(owner) || !StrEqual(classname, "entity_revive_marker"))
 		return MRES_Ignored;
-	}
 
 	g_iHealthBeforeHeal = GetEntProp(healingTarget, Prop_Data, "m_iHealth");
 	if(MvMPlayer(owner).ReviveThinkCooldown >= GetGameTime())
@@ -632,10 +667,12 @@ public MRESReturn DHookCallback_Medigun_HealTargetThink_Post(int pThis)
 		healed = GetEntProp(healingTarget, Prop_Data, "m_iHealth") - health;
 	bool isCharging = GetEntProp(pThis, Prop_Send, "m_bChargeRelease") > 0;
 
-	if(!IsPlayerAlive(owner) || (0 < healingTarget && healingTarget <= MaxClients))
-	{
+	if(!IsValidEntity(healingTarget))		return MRES_Ignored;
+
+	char classname[64];
+	GetEntityClassname(healingTarget, classname, sizeof(classname));
+	if(!IsPlayerAlive(owner) || !StrEqual(classname, "entity_revive_marker"))
 		return MRES_Ignored;
-	}
 
 	if(MvMPlayer(owner).ReviveThinkCooldown < GetGameTime())
 	{
@@ -662,7 +699,11 @@ public MRESReturn DHookCallback_Medigun_SubtractChargeAndUpdateDeployState_Pre(i
 		healingTarget = GetEntPropEnt(pThis, Prop_Send, "m_hHealingTarget");
 	bool isCharging = GetEntProp(pThis, Prop_Send, "m_bChargeRelease") > 0;
 
-	if(!IsPlayerAlive(owner) || (-1 <= healingTarget && healingTarget <= MaxClients) || !isCharging)
+	if(!IsValidEntity(healingTarget))		return MRES_Ignored;
+
+	char classname[64];
+	GetEntityClassname(healingTarget, classname, sizeof(classname));
+	if(!IsPlayerAlive(owner) || !StrEqual(classname, "entity_revive_marker") || !isCharging)
 		return MRES_Ignored;
 
 	float flSubtractAmount = params.Get(1);

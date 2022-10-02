@@ -17,7 +17,7 @@
 
 #define UPGRADE_SIGN_MODEL	"models/props_mvm/mvm_upgrade_tools.mdl"
 
-ArrayList g_hStationList;
+// ArrayList g_hStationList;
 
 void Events_Initialize()
 {
@@ -27,6 +27,10 @@ void Events_Initialize()
 	HookEvent("teamplay_setup_finished", Event_TeamplaySetupFinished);
 	HookEvent("teamplay_round_start", Event_TeamplayRoundStart);
 	HookEvent("post_inventory_application", Event_PostInventoryApplication);
+
+	HookEvent("player_spawn", Event_PlayerSpawn_Pre, EventHookMode_Pre);
+	HookEvent("player_spawn", Event_PlayerSpawn_Post, EventHookMode_Post);
+
 	HookEvent("player_death", Event_PlayerDeath);
 	// HookEvent("player_team", Event_PlayerTeam);
 	HookEvent("player_buyback", Event_PlayerBuyback, EventHookMode_Pre);
@@ -69,7 +73,7 @@ public void Event_TeamplayRoundWin(Event event, const char[] name, bool dontBroa
 	//NOTE: teamplay_round_start fires too late for us to reset player upgrades.
 	//Instead we hook this event to reset everything in a RoundRespawn hook.
 	g_ForceMapReset = event.GetBool("full_round") && mvm_reset_on_round_end.BoolValue;
-
+/*
 	for(int loop = 0; loop < g_hStationList.Length; loop++)
 	{
 		CTFUpgradeStation station = g_hStationList.Get(loop);
@@ -77,6 +81,7 @@ public void Event_TeamplayRoundWin(Event event, const char[] name, bool dontBroa
 		delete station.PropTimer;
 		station.PropTimer = null;
 	}
+*/
 }
 
 public void Event_TeamplayRestartRound(Event event, const char[] name, bool dontBroadcast)
@@ -122,7 +127,7 @@ public void Event_TeamplayRoundStart(Event event, const char[] name, bool dontBr
 	{
 		MvMPlayer(client).ReviveThinkCooldown = 0.0;
 	}
-
+/*
 	float pos[3];
 	for(int loop = 0; loop < g_hStationList.Length; loop++)
 	{
@@ -148,8 +153,10 @@ public void Event_TeamplayRoundStart(Event event, const char[] name, bool dontBr
 				CreateTimer(0.05, Timer_UpgradeLogo, station, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
+*/
 }
 
+/*
 public Action Timer_UpgradeLogo(Handle timer, CTFUpgradeStation station)
 {
 	float angles[3];
@@ -161,6 +168,7 @@ public Action Timer_UpgradeLogo(Handle timer, CTFUpgradeStation station)
 	TeleportEntity(prop, NULL_VECTOR, angles, NULL_VECTOR);
 	return Plugin_Continue;
 }
+*/
 
 public void Event_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
 {
@@ -201,8 +209,20 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
+public void Event_PlayerSpawn_Pre(Event event, const char[] name, bool dontBroadcast)
+{
+	SetMannVsMachineMode(false);
+}
+
+public void Event_PlayerSpawn_Post(Event event, const char[] name, bool dontBroadcast)
+{
+	ResetMannVsMachineMode();
+}
+
 public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
+	if(CheckRoundState() != 1)		return;
+
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 	int weaponid = event.GetInt("weaponid");
@@ -210,31 +230,58 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	bool silent_kill = event.GetBool("silent_kill");
 
 	int amount = mvm_currency_rewards_player_killed.IntValue;
+	bool deathpenalty = mvm_currency_death_penalty.BoolValue;
 
-	if (amount > 0 && IsValidClient(attacker))
+	if(IsValidClient(attacker) && !(death_flags & TF_DEATHFLAG_DEADRINGER))
 	{
 		//Create currency pack
-		if (victim != attacker)
-		{
-			bool forceDistribute = TF2_GetPlayerClass(attacker) == TFClass_Sniper && WeaponID_IsSniperRifleOrBow(weaponid);
+		bool forceDistribute = TF2_GetPlayerClass(attacker) == TFClass_Sniper
+			&& WeaponID_IsSniperRifleOrBow(weaponid);
 
-			//CTFPlayer::DropCurrencyPack does not assign a team to the currency pack but CTFGameRules::DistributeCurrencyAmount needs to know it
+		int forcedVictimTeam = mvm_force_currency_victim_team.IntValue;
+		//CTFPlayer::DropCurrencyPack does not assign a team to the currency pack but CTFGameRules::DistributeCurrencyAmount needs to know it
+
+		if(forcedVictimTeam > 1)
+		{
+			if(view_as<int>(TF2_GetClientTeam(victim)) != forcedVictimTeam)
+				return;
+
+			g_CurrencyPackTeam = TF2_GetClientTeam(victim);
+		}
+		else
 			g_CurrencyPackTeam = TF2_GetClientTeam(attacker);
 
+		SetMannVsMachineMode(true);
+		if(deathpenalty && MvMPlayer(victim).Currency > 0)
+		{
+			int alive = GetAlivePlayers(GetClientTeam(victim), false);
+			int currentMoney = MvMPlayer(victim).Currency / (alive > 0 ? alive : 1);
+			MvMPlayer(victim).Currency = 0;
 
+			while(currentMoney > 0)
+			{
+				if(currentMoney >= 100)
+					SDKCall_DropCurrencyPack(victim, TF_CURRENCY_PACK_CUSTOM, 100);
+				else
+					SDKCall_DropCurrencyPack(victim, TF_CURRENCY_PACK_CUSTOM, currentMoney);
+
+				currentMoney -= 100;
+			}
+		}
+
+		if(IsValidClient(attacker) && victim != attacker
+			&& amount > 0)
+		{
 			float multiplier = (mvm_currency_rewards_player_count_bonus.FloatValue - 1.0) / MaxClients * (MaxClients - GetClientCount(true));
 			amount += RoundToCeil(mvm_currency_rewards_player_killed.IntValue * multiplier);
 
 			//Enable MvM so money earned by Snipers gets force-distributed
-			SetMannVsMachineMode(true);
-
 			if (forceDistribute)
 				SDKCall_DropCurrencyPack(victim, TF_CURRENCY_PACK_CUSTOM, amount, forceDistribute, attacker);
 			else
 				SDKCall_DropCurrencyPack(victim, TF_CURRENCY_PACK_CUSTOM, amount);
-
-			ResetMannVsMachineMode();
 		}
+		ResetMannVsMachineMode();
 
 		if (mvm_drop_revivemarker.BoolValue && !(death_flags & TF_DEATHFLAG_DEADRINGER) && !silent_kill)
 		{
@@ -264,16 +311,26 @@ public Action Event_PlayerBuyback(Event event, const char[] name, bool dontBroad
 
 public Action Event_PlayerUsedPowerupBottle(Event event, const char[] name, bool dontBroadcast)
 {
-	// int player = event.GetInt("player");
-
+/*
 	//Only broadcast to spectators and our own team
 	event.BroadcastDisabled = true;
-
 	for (int client = 1; client <= MaxClients; client++)
 	{
-		if (IsClientInGame(client) /* && (TF2_GetClientTeam(client) == TF2_GetClientTeam(player) || TF2_GetClientTeam(client) == TFTeam_Spectator)*/)
+		if (IsClientInGame(client)  && (TF2_GetClientTeam(client) == TF2_GetClientTeam(player) || TF2_GetClientTeam(client) == TFTeam_Spectator))
 		{
 			event.FireToClient(client);
+		}
+	}
+*/
+	int player = event.GetInt("player");
+	int medigun = GetPlayerWeaponSlot(player, TFWeaponSlot_Secondary);
+
+	if(IsValidEntity(medigun) && HasEntProp(medigun, Prop_Send, "m_hHealingTarget"))
+	{
+		int currentHeal = GetEntProp(medigun, Prop_Send, "m_hHealingTarget") & 0xff;
+		if((0 < currentHeal && currentHeal <= MaxClients) && TF2_GetClientTeam(player) != TF2_GetClientTeam(currentHeal))
+		{
+			SetEntProp(medigun, Prop_Send, "m_hHealingTarget", -1);
 		}
 	}
 
