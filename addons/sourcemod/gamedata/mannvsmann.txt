@@ -54,9 +54,9 @@
 				"linux"		"@_ZN12CTFGameRules24DistributeCurrencyAmountEiP9CTFPlayerbbb"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x80\x7D\x10\x00"
 			}
-			"CTFGameRules::CanUpgradeWithAttrib"
+			"CNavMesh::GetNavArea"
 			{
-				"linux"		"@_ZN12CTFGameRules20CanUpgradeWithAttribEP9CTFPlayeritP22CMannVsMachineUpgrades"
+				"linux"		"@_ZNK8CNavMesh10GetNavAreaERK6Vectorf"
 				"windows"	" "
 			}
 			"CTFPlayerShared::ConditionGameRulesThink"
@@ -149,9 +149,9 @@
 				"linux"		"@_ZN14CWeaponMedigun15HealTargetThinkEv"
 				"windows"	" "
 			}
-			"CTFGameRules::GetUpgradeTier"
+			"CTFPowerupBottle::ReapplyProvision"
 			{
-				"linux"		"@_ZN12CTFGameRules14GetUpgradeTierEi"
+				"linux"		"@_ZN16CTFPowerupBottle16ReapplyProvisionEv"
 				"windows"	" "
 			}
 			"CWeaponMedigun::SubtractChargeAndUpdateDeployState"
@@ -179,18 +179,18 @@
 			}
 			"CCurrencyPack::MyTouch"
 			{
-				"linux"		"223"
-				"windows"	"222"
+				"linux"		"226"
+				"windows"	"225"
 			}
 			"CCurrencyPack::ComeToRest"
 			{
-				"linux"		"227"
-				"windows"	"224"
+				"linux"		"230"
+				"windows"	"227"
 			}
 			"CTFPowerup::ValidTouch"
 			{
-				"linux"		"228"
-				"windows"	"225"
+				"linux"		"231"
+				"windows"	"228"
 			}
 			"CTFGameRules::ShouldSwitchTeams"
 			{
@@ -214,8 +214,8 @@
 			}
 			"CTFGameRules::RoundRespawn"
 			{
-				"linux"		"226"
-				"windows"	"224"
+				"linux"		"227"
+				"windows"	"225"
 			}
 			"CTFPlayerShared::m_pOuter"
 			{
@@ -610,19 +610,12 @@
 				"return"	"void"
 				"this"		"entity"
 			}
-			"CTFGameRules::GetUpgradeTier"
+			"CTFPowerupBottle::ReapplyProvision"
 			{
-				"signature" "CTFGameRules::GetUpgradeTier"
+				"signature" "CTFPowerupBottle::ReapplyProvision"
 				"callconv"	"thiscall"
-				"return"	"int"
+				"return"	"void"
 				"this"		"entity"
-				"arguments"
-				{
-					"iUpgrade"
-					{
-						"type"	"int"
-					}
-				}
 			}
 			"CWeaponMedigun::SubtractChargeAndUpdateDeployState"
 			{
@@ -642,12 +635,12 @@
 					}
 				}
 			}
-			"CMannVsMachineUpgradeManager::LevelInitPostEntity"
+			"CNavMesh::GetNavArea"
 			{
-				"signature" "CMannVsMachineUpgradeManager::LevelInitPostEntity"
+				"signature" "CNavMesh::GetNavArea"
 				"callconv"	"thiscall"
-				"return"	"void"
-				"this"		"address"
+				"return"	"int" // Not really.
+				"this"		"ignore"
 			}
 		}
 		"Addresses"
