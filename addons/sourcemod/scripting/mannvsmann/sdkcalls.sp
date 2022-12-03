@@ -25,7 +25,7 @@ static Handle g_SDKCallReviveMarkerCreate;
 static Handle g_SDKCallRemoveImmediate;
 static Handle g_SDKCallGetBaseEntity;
 static Handle g_SDKCallShouldSwitchTeams;
-static Handle g_SDKCallShouldScrambleTeams;
+// static Handle g_SDKCallShouldScrambleTeams;
 static Handle g_SDKCallGetNextRespawnWave;
 
 void SDKCalls_Initialize(GameData gamedata)
@@ -40,7 +40,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallRemoveImmediate = PrepSDKCall_RemoveImmediate(gamedata);
 	g_SDKCallGetBaseEntity = PrepSDKCall_GetBaseEntity(gamedata);
 	g_SDKCallShouldSwitchTeams = PrepSDKCall_ShouldSwitchTeams(gamedata);
-	g_SDKCallShouldScrambleTeams = PrepSDKCall_ShouldScrambleTeams(gamedata);
+	// g_SDKCallShouldScrambleTeams = PrepSDKCall_ShouldScrambleTeams(gamedata);
 	g_SDKCallGetNextRespawnWave = PrepSDKCall_GetNextRespawnWave(gamedata);
 }
 
@@ -181,6 +181,7 @@ Handle PrepSDKCall_ShouldSwitchTeams(GameData gamedata)
 	return call;
 }
 
+/*
 Handle PrepSDKCall_ShouldScrambleTeams(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_GameRules);
@@ -193,6 +194,7 @@ Handle PrepSDKCall_ShouldScrambleTeams(GameData gamedata)
 
 	return call;
 }
+*/
 
 Handle PrepSDKCall_GetNextRespawnWave(GameData gamedata)
 {
@@ -281,6 +283,7 @@ bool SDKCall_ShouldSwitchTeams()
 	return false;
 }
 
+/*
 bool SDKCall_ShouldScrambleTeams()
 {
 	if (g_SDKCallShouldScrambleTeams)
@@ -288,6 +291,7 @@ bool SDKCall_ShouldScrambleTeams()
 
 	return false;
 }
+*/
 
 float SDKCall_GetNextRespawnWave(int team, int player)
 {
