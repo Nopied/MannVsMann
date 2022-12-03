@@ -235,7 +235,6 @@ public void OnMapStart()
 	PrecacheSound(SOUND_CREDITS_UPDATED);
 
 	DHooks_HookGameRules();
-	// PrecacheBeamPoint();
 
 	DispatchSpawn(CreateEntityByName("func_upgradestation"));
 
@@ -246,214 +245,11 @@ public void OnMapStart()
 	{
 		SetCustomUpgradesFile(path);
 	}
-/*
-	if(g_hCornerList != null)
-	{
-		for(int loop = 0; loop < g_hCornerList.Length; loop++)
-		{
-			CornerList cornerlist = g_hCornerList.Get(loop);
-			delete cornerlist;
-		}
 
-		delete g_hCornerList;
-	}
-	g_hCornerList = new ArrayList();
-
-	if(g_hStationList != null)
-	{
-		for(int loop = 0; loop < g_hStationList.Length; loop++)
-		{
-			CTFUpgradeStation station = g_hStationList.Get(loop);
-			delete station;
-		}
-
-		delete g_hStationList;
-	}
-	g_hStationList = new ArrayList();
-*/
 	//An info_populator entity is required for a lot of MvM-related stuff (preserved entity)
 	CreateEntityByName("info_populator");
-
-	//Create upgrade stations (preserved entity)
-
-
-/*
-	int regenerate = MaxClients + 1;
-	while ((regenerate = FindEntityByClassname(regenerate, "func_regenerate")) != -1)
-	{
-		float origin[3], mins[3], maxs[3];
-		GetEntPropVector(regenerate, Prop_Send, "m_vecOrigin", origin);
-		GetEntPropVector(regenerate, Prop_Send, "m_vecMins", mins);
-		GetEntPropVector(regenerate, Prop_Send, "m_vecMaxs", maxs);
-
-		LogMessage("[regenerate %d] min(%.1f, %.1f, %.1f), max(%.1f, %.1f, %.1f), origin(%.1f, %.1f, %.1f)",
-		regenerate, mins[0], mins[1], mins[2], maxs[0], maxs[1], maxs[2], origin[0], origin[1], origin[2]);
-
-	}
-*/
-/*
-float previousPos[3], currentPos[3];
-int spawnPoint = MaxClients + 1;
-int roots[32], rootCount = 0, team;
-bool rootExist;
-	while ((spawnPoint = FindEntityByClassname(spawnPoint, "info_player_teamspawn")) != -1)
-	{
-
-//			Gathering vector of spawn point.
-//			Rules for connecting in each of spawn point:
-//				 - Two of them's distance <= 400
-//				 - Two of them can spawn same team (exclude 'Both')
-
-		if((team = GetEntProp(spawnPoint, Prop_Send, "m_iTeamNum")) <= 1)
-			continue;
-
-		rootExist = false;
-		GetEntPropVector(spawnPoint, Prop_Send, "m_vecOrigin", currentPos);
-
-//		LogMessage("[ent %d] spawnPoint (%.1f, %.1f, %.1f)",
-//		spawnPoint, currentPos[0], currentPos[1], currentPos[2]);
-
-		for(int loop = 0; loop < rootCount; loop++)
-		{
-			ArrayList array = view_as<ArrayList>(roots[loop]);
-
-			for(int search = 0; search < array.Length; search++)
-			{
-				CTFSpawnPoint previous = array.Get(search);
-				GetEntPropVector(previous.Index, Prop_Send, "m_vecOrigin", previousPos);
-
-//				LogMessage("[%d - %d] %d's currentPos (%.1f %.1f %.1f) | %.1f | previousPos (%.1f %.1f %.1f)",
-//				loop, search, spawnPoint,
-//				currentPos[0], currentPos[1], currentPos[2], GetVectorDistance(currentPos, previousPos),
-//				previousPos[0], previousPos[1], previousPos[2]);
-
-				if(previous.Team != team) continue;
-
-				if(GetVectorDistance(currentPos, previousPos) <= 400.0)
-				{
-					array.Push(new CTFSpawnPoint(spawnPoint, team));
-					rootExist = true;
-
-//					LogMessage("[%d - %d] Created leaf for %d",
-//					loop, search, spawnPoint);
-
-					break;
-				}
-			}
-
-			if(rootExist)
-				break;
-		}
-
-		if(!rootExist)
-		{
-			ArrayList tempArray = new ArrayList();
-			roots[rootCount++] = view_as<int>(tempArray);
-			tempArray.Push(view_as<int>(new CTFSpawnPoint(spawnPoint, team)));
-
-//			LogMessage("[%d] Created root for %d",
-//			rootCount - 1, spawnPoint);
-		}
-	}
-
-	// Making a single upgrade station by gathered spawn points.
-	for(int loop = 0; loop < rootCount; loop++)
-	{
-		ArrayList array = view_as<ArrayList>(roots[loop]);
-		float maxPos[3] = {0.0, 0.0, 0.0}, minPos[3] = {0.0, 0.0, 0.0};
-
-		for(int search = 0; search < array.Length; search++)
-		{
-			CTFSpawnPoint previous = array.Get(search);
-			GetEntPropVector(previous.Index, Prop_Send, "m_vecOrigin", previousPos);
-
-			for(int pos = 0; pos < 3; pos++)
-			{
-				maxPos[pos] = previousPos[pos] > maxPos[pos] || maxPos[pos] == 0.0
-					? previousPos[pos] : maxPos[pos];
-				minPos[pos] = previousPos[pos] < minPos[pos] || minPos[pos] == 0.0
-					? previousPos[pos] : minPos[pos];
-
-				if(pos < 2 && maxPos[pos] - minPos[pos] < 100.0)
-					maxPos[pos] += 50.0, minPos[pos] -= 50.0;
-			}
-		}
-
-		// Setup Corner
-		float startPos[3], endPos[3];
-
-		FloatToVector(startPos, minPos[0], minPos[1], minPos[2]);
-		FloatToVector(endPos, minPos[0], maxPos[1], minPos[2]);
-		g_hCornerList.Push(new CornerList(startPos, endPos));
-
-		FloatToVector(startPos, minPos[0], minPos[1], minPos[2]);
-		FloatToVector(endPos, maxPos[0], minPos[1], minPos[2]);
-		g_hCornerList.Push(new CornerList(startPos, endPos));
-
-		FloatToVector(startPos, maxPos[0], minPos[1], minPos[2]);
-		FloatToVector(endPos, maxPos[0], maxPos[1], minPos[2]);
-		g_hCornerList.Push(new CornerList(startPos, endPos));
-
-		FloatToVector(startPos, minPos[0], maxPos[1], minPos[2]);
-		FloatToVector(endPos, maxPos[0], maxPos[1], minPos[2]);
-		g_hCornerList.Push(new CornerList(startPos, endPos));
-
-//		LogMessage("[%d] X(min: %.1f max: %.1f), Z(min: %.1f max: %.1f)",
-//			loop, minX, maxX, minZ, maxZ);
-
-		float origin[3] = {0.0, 0.0, 0.0};
-		maxPos[2] += 100.0;
-
-// 		LogMessage("[%d] min(%.1f, %.1f, %.1f), max(%.1f, %.1f, %.1f)",
-//		loop, minPos[0], minPos[1], minPos[2], maxPos[0], maxPos[1], maxPos[2]);
-
-		int upgradestation = CreateEntityByName("func_upgradestation");
-		if (IsValidEntity(upgradestation) && DispatchSpawn(upgradestation))
-		{
-			SetEntityModel(upgradestation, UPGRADE_STATION_MODEL);
-			SetEntPropVector(upgradestation, Prop_Send, "m_vecMins", minPos);
-			SetEntPropVector(upgradestation, Prop_Send, "m_vecMaxs", maxPos);
-			SetEntProp(upgradestation, Prop_Send, "m_nSolidType", SOLID_BBOX);
-
-			TeleportEntity(upgradestation, origin, NULL_VECTOR, NULL_VECTOR);
-			ActivateEntity(upgradestation);
-
-			SDKHook(upgradestation, SDKHook_StartTouch, OnTouchUpgradeStation);
-			SDKHook(upgradestation, SDKHook_Touch, OnTouchUpgradeStation);
-			SDKHook(upgradestation, SDKHook_EndTouchPost, OnTouchUpgradeStation_End);
-
-			for(int column = 0; column < 2; column++)
-				origin[column] = minPos[column] + ((maxPos[column] - minPos[column]) * 0.5);
-			origin[2] = minPos[2];
-
-			g_hStationList.Push(new CTFUpgradeStation(upgradestation, origin));
-		}
-	}
-
-	// Delete all of them
-	for(int loop = 0; loop < rootCount; loop++)
-	{
-		ArrayList array = view_as<ArrayList>(roots[loop]);
-
-		for(int search = 0; search < array.Length; search++)
-		{
-			CTFSpawnPoint temp = array.Get(search);
-
-//			GetEntPropVector(temp.Index, Prop_Send, "m_vecOrigin", previousPos);
-//			LogMessage("[%d - %d] %d (%.1f, %.1f)",
-//			loop, search, temp.Index, previousPos[0], previousPos[1]);
-
-			delete temp;
-		}
-
-		delete array;
-	}
-
-	CreateTimer(1.0, Timer_BeamPoint, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
-*/
 }
 
-bool g_bIsBlockUpgrade[MAXPLAYERS+1];
 public Action OnTouchUpgradeStation(int upgradeStation, int other)
 {
 	if(!IsValidClient(other))
@@ -477,78 +273,9 @@ public Action OnTouchUpgradeStation(int upgradeStation, int other)
 		SetEntProp(other, Prop_Send, "m_bInUpgradeZone", 0);
 		return Plugin_Handled;
 	}
-/*
-	if(action != Plugin_Continue || g_bIsBlockUpgrade[other])
-	{
-		SetEntProp(other, Prop_Send, "m_bInUpgradeZone", 0);
-		return Plugin_Handled;
-	}
-
-	int buttons = GetClientButtons(other);
-	if((buttons & IN_DUCK) > 0)
-	{
-		SetEntProp(other, Prop_Send, "m_bInUpgradeZone", 0);
-
-		if((buttons & IN_JUMP) > 0 && CheckRoundState() == 1)
-			g_bIsBlockUpgrade[other] = true;
-
-		return Plugin_Handled;
-	}
-*/
-	return Plugin_Continue;
-}
-
-/*
-public void OnTouchUpgradeStation_End(int upgradeStation, int other)
-{
-	if(!IsValidClient(other))
-		return;
-
-	g_bIsBlockUpgrade[other] = false;
-	SetEntProp(other, Prop_Send, "m_bInUpgradeZone", 0);
-}
-
-
-public Action Timer_BeamPoint(Handle timer)
-{
-	float startPos[3], endPos[3];
-	int color[4] = {255, 255, 255, 255};
-
-	for(int loop = 0; loop < g_hCornerList.Length; loop++)
-	{
-		CornerList corner = g_hCornerList.Get(loop);
-		corner.GetStartPos(startPos);
-		corner.GetEndPos(endPos);
-		TE_SetupBeamPoints(startPos, endPos, g_BeamSprite, g_HaloSprite, 0, 10, 1.0, 20.0, 20.0, 0, 0.0, color, 10);
-		TE_SendToAll();
-	}
 
 	return Plugin_Continue;
 }
-
-void PrecacheBeamPoint()
-{
-    Handle gameConfig = LoadGameConfigFile("funcommands.games");
-    if (gameConfig == null)
-    {
-        SetFailState("Unable to load game config funcommands.games");
-        return;
-    }
-
-    char buffer[PLATFORM_MAX_PATH];
-    if (GameConfGetKeyValue(gameConfig, "SpriteBeam", buffer, sizeof(buffer)) && buffer[0])
-    {
-        g_BeamSprite = PrecacheModel(buffer);
-    }
-
-    if (GameConfGetKeyValue(gameConfig, "SpriteHalo", buffer, sizeof(buffer)) && buffer[0])
-    {
-        g_HaloSprite = PrecacheModel(buffer);
-    }
-
-    delete gameConfig;
-}
-*/
 
 public void OnClientPutInServer(int client)
 {
@@ -657,36 +384,11 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 	char section[32];
 	if (kv.GetSectionName(section, sizeof(section)))
 	{
-		// PrintToChat(client, "%s", section);
 		if (strncmp(section, "MvM_", 4, false) == 0)
 		{
 			//Enable MvM for client commands to be processed in CTFGameRules::ClientCommandKeyValues
 			SetMannVsMachineMode(true);
-/*
-			if (strcmp(section, "MVM_Upgrade") == 0)
-			{
-				if (kv.JumpToKey("Upgrade"))
-				{
-					int upgrade = kv.GetNum("Upgrade");
-					int count = kv.GetNum("count");
 
-					if (upgrade == 23 && count == 1)
-					{
-						//Disposable Sentry
-						PrintCenterText(client, "%T", "MvM_Upgrade_DisposableSentry", client);
-					}
-
-
-					if(IsBannedUpgrade(upgrade) && count > 0)
-					{
-						PrintCenterText(client, "%T", "MvM_BannedUpgrade", client);
-						PrintToChat(client, "%T", "MvM_BannedUpgrade", client);
-					}
-
-					// PrintToServer("%N, upgrade: %d, count: %d", client, upgrade, count);
-				}
-			}
-*/
 			if (strcmp(section, "MvM_UpgradesBegin") == 0)
 			{
 				if(mvm_disable_respec_menu.BoolValue)	return Plugin_Continue;

@@ -685,18 +685,6 @@ public MRESReturn DHookCallback_PowerupBottle_AllowedToUse_Post(int pThis, DHook
 	}
 
 	ret.Value = true;
-/*
-	float multiplier = 1.0;
-	Address address;
-
-	address = TF2Attrib_GetByName(pThis, "ubercharge");
-	if(address != Address_Null && TF2Attrib_GetValue(address) > 0.0)
-		multiplier += 0.5;
-
-	address = TF2Attrib_GetByName(pThis, "recall");
-	if(address != Address_Null && TF2Attrib_GetValue(address) > 0.0)
-		multiplier += 1.0;
-*/
 	MvMPlayer(owner).CarteenCooldown = GetGameTime() + mvm_carteen_cooldown.FloatValue;
 
 	return MRES_ChangedOverride;
@@ -723,7 +711,6 @@ public MRESReturn DHookCallback_Medigun_HealTargetThink_Pre(int pThis)
 		return MRES_Ignored;
 	}
 
-	// MvMPlayer(owner).ReviveThinkCooldown = GetGameTime() + 0.15;
 	return MRES_Ignored;
 }
 
@@ -783,23 +770,3 @@ public MRESReturn DHookCallback_Medigun_SubtractChargeAndUpdateDeployState_Pre(i
 
 	return MRES_ChangedOverride;
 }
-
-/*
-public MRESReturn DHookCallback_GameRules_GetUpgradeTier_Pre(int pThis, DHookReturn ret, DHookParam params)
-{
-	int iUpgrade = params.Get(1);
-	// PrintToServer("Banned Check: %d", iUpgrade);
- 	if(IsBannedUpgrade(iUpgrade))
-	{
-		// PrintToServer("Banned");
-		ret.Value = 0;
-		return MRES_Supercede;
-	}
-	return MRES_Ignored;
-}
-
-public MRESReturn DHookCallback_GameRules_GetUpgradeTier_Post(int pThis, DHookReturn ret, DHookParam params)
-{
-	return MRES_Ignored;
-}
-*/
