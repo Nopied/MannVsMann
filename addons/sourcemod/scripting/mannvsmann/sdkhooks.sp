@@ -60,6 +60,8 @@ public Action Client_OnTakeDamage(int victim, int &attacker, int &inflictor, flo
 	//OnTakeDamage may get called while CTFPlayerShared::ConditionGameRulesThink has MvM enabled
 	//It does some unwanted stuff like defender death sounds and creating additional revive markers, suppress it
 	SetMannVsMachineMode(false);
+
+	return Plugin_Continue;
 }
 
 public void Client_OnTakeDamagePost(int victim, int attacker, int inflictor, float damage, int damagetype, int weapon, const float damageForce[3], const float damagePosition[3], int damagecustom)
@@ -145,4 +147,6 @@ public Action RespawnRoom_Touch(int respawnroom, int other)
 			TF2_AddCondition(other, TFCond_UberchargeFading, 0.5);
 		}
 	}
+
+	return Plugin_Continue;
 }

@@ -111,6 +111,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	Natives_Initialize();
 
 	RegPluginLibrary("mannvsmann");
+
+	return APLRes_Success;
 }
 
 public void OnPluginStart()
@@ -802,6 +804,8 @@ public Action EntityOutput_OnTimer10SecRemain(const char[] output, int caller, i
 			EmitGameSoundToAll("music.mvm_start_mid_wave");
 		}
 	}
+
+	return Plugin_Continue;
 }
 
 public Action NormalSoundHook(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)

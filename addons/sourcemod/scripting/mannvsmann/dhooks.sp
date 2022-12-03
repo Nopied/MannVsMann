@@ -154,6 +154,8 @@ public MRESReturn DHookCallback_PopulationManagerResetMap_Pre()
 			MvMPlayer(client).SetTeam(TFTeam_Red);
 		}
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_PopulationManagerResetMap_Post()
@@ -165,17 +167,23 @@ public MRESReturn DHookCallback_PopulationManagerResetMap_Post()
 			MvMPlayer(client).ResetTeam();
 		}
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_IsQuickBuildTime_Pre()
 {
 	//Allows Engineers to quickbuild during setup
 	SetMannVsMachineMode(true);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_IsQuickBuildTime_Post()
 {
 	ResetMannVsMachineMode();
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_GameModeUsesUpgrades_Post(DHookReturn ret)
@@ -190,11 +198,15 @@ public MRESReturn DHookCallback_CanPlayerUseRespec_Pre()
 	//Enables respecs regardless of round state
 	g_PreHookRoundState = GameRules_GetRoundState();
 	GameRules_SetProp("m_iRoundState", RoundState_BetweenRounds);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_CanPlayerUseRespec_Post()
 {
 	GameRules_SetProp("m_iRoundState", g_PreHookRoundState);
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_DistributeCurrencyAmount_Pre(DHookReturn ret, DHookParam params)
@@ -235,6 +247,8 @@ public MRESReturn DHookCallback_DistributeCurrencyAmount_Pre(DHookReturn ret, DH
 			EmitSoundToClient(player, SOUND_CREDITS_UPDATED, _, SNDCHAN_STATIC, SNDLEVEL_NONE, _, 0.1);
 		}
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_DistributeCurrencyAmount_Post(DHookReturn ret, DHookParam params)
@@ -254,28 +268,38 @@ public MRESReturn DHookCallback_DistributeCurrencyAmount_Post(DHookReturn ret, D
 			}
 		}
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ConditionGameRulesThink_Pre()
 {
 	//Enables radius currency collection, radius spy scan and increased rage gain during setup
 	SetMannVsMachineMode(true);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ConditionGameRulesThink_Post()
 {
 	ResetMannVsMachineMode();
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_CanRecieveMedigunChargeEffect_Pre()
 {
 	//MvM allows flag carriers to be ubered, we don't want this (enabled from CTFPlayerShared::ConditionGameRulesThink)
 	SetMannVsMachineMode(false);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_CanRecieveMedigunChargeEffect_Post()
 {
 	ResetMannVsMachineMode();
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_RadiusSpyScan_Pre(Address playerShared)
@@ -306,6 +330,8 @@ public MRESReturn DHookCallback_RadiusSpyScan_Pre(Address playerShared)
 			}
 		}
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_RadiusSpyScan_Post(Address playerShared)
@@ -317,6 +343,8 @@ public MRESReturn DHookCallback_RadiusSpyScan_Post(Address playerShared)
 			MvMPlayer(client).ResetTeam();
 		}
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int client)
@@ -326,6 +354,8 @@ public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int client)
 	{
 		MvMPlayer(client).SetTeam(TFTeam_Red);
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Post(int client)
@@ -334,39 +364,53 @@ public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Post(int client)
 	{
 		MvMPlayer(client).ResetTeam();
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_CanBuild_Pre()
 {
 	//Limits the amount of sappers that can be placed on players
 	SetMannVsMachineMode(true);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_CanBuild_Post()
 {
 	ResetMannVsMachineMode();
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ManageRegularWeapons_Pre()
 {
 	//Allows the call to CTFPlayer::ReapplyPlayerUpgrades to happen
 	SetMannVsMachineMode(true);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ManageRegularWeapons_Post()
 {
 	ResetMannVsMachineMode();
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_RegenThink_Pre()
 {
 	//Health regeneration has no scaling in MvM
 	SetMannVsMachineMode(true);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_RegenThink_Post()
 {
 	ResetMannVsMachineMode();
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_Regenerate_Pre(int pThis)
@@ -395,6 +439,8 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj)
 			SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
 		}
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj)
@@ -410,6 +456,8 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj)
 			SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
 		}
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ShouldQuickBuild_Pre(int obj)
@@ -419,6 +467,8 @@ public MRESReturn DHookCallback_ShouldQuickBuild_Pre(int obj)
 	//Sentries owned by MvM defenders can be re-deployed quickly, move the sentry to the defender team
 	g_PreHookTeam = TF2_GetTeam(obj);
 	TF2_SetTeam(obj, TFTeam_Red);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ShouldQuickBuild_Post(int obj, DHookReturn ret)
@@ -426,6 +476,8 @@ public MRESReturn DHookCallback_ShouldQuickBuild_Post(int obj, DHookReturn ret)
 	ResetMannVsMachineMode();
 
 	TF2_SetTeam(obj, g_PreHookTeam);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ApplyRoboSapperEffects_Pre(int sapper, DHookReturn ret, DHookParam params)
@@ -434,13 +486,16 @@ public MRESReturn DHookCallback_ApplyRoboSapperEffects_Pre(int sapper, DHookRetu
 
 	//Minibosses in MvM get slowed down instead of fully stunned
 	SetEntProp(target, Prop_Send, "m_bIsMiniBoss", true);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ApplyRoboSapperEffects_Post(int sapper, DHookReturn ret, DHookParam params)
 {
 	int target = params.Get(1);
-
 	SetEntProp(target, Prop_Send, "m_bIsMiniBoss", false);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_MyTouch_Pre(int currencypack, DHookReturn ret, DHookParam params)
@@ -456,6 +511,8 @@ public MRESReturn DHookCallback_MyTouch_Pre(int currencypack, DHookReturn ret, D
 	//Enables money pickup voice lines
 	SetVariantString("IsMvMDefender:1");
 	AcceptEntityInput(player, "AddContext");
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_MyTouch_Post(int currencypack, DHookReturn ret, DHookParam params)
@@ -466,6 +523,8 @@ public MRESReturn DHookCallback_MyTouch_Post(int currencypack, DHookReturn ret, 
 
 	SetVariantString("IsMvMDefender");
 	AcceptEntityInput(player, "RemoveContext");
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ComeToRest_Pre(int currencypack)
@@ -475,8 +534,9 @@ public MRESReturn DHookCallback_ComeToRest_Pre(int currencypack)
 
 	//Set the currency pack team for distribution
 	g_CurrencyPackTeam = TF2_GetTeam(currencypack);
-
 	g_bComeToRest = true;
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ComeToRest_Post()
@@ -484,6 +544,8 @@ public MRESReturn DHookCallback_ComeToRest_Post()
 	ResetMannVsMachineMode();
 
 	g_CurrencyPackTeam = TFTeam_Invalid;
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ValidTouch_Pre(int pThis, DHookReturn ret, DHookParam params)
@@ -517,6 +579,8 @@ public MRESReturn DHookCallback_ValidTouch_Pre(int pThis, DHookReturn ret, DHook
 public MRESReturn DHookCallback_ValidTouch_Post()
 {
 	ResetMannVsMachineMode();
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ShouldRespawnQuickly_Pre(DHookReturn ret, DHookParam params)
@@ -528,6 +592,8 @@ public MRESReturn DHookCallback_ShouldRespawnQuickly_Pre(DHookReturn ret, DHookP
 
 	//MvM defenders are allowed to respawn quickly, move the player to the defender team
 	MvMPlayer(player).SetTeam(TFTeam_Red);
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ShouldRespawnQuickly_Post(DHookReturn ret, DHookParam params)
@@ -537,6 +603,8 @@ public MRESReturn DHookCallback_ShouldRespawnQuickly_Post(DHookReturn ret, DHook
 	ResetMannVsMachineMode();
 
 	MvMPlayer(player).ResetTeam();
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_RoundRespawn_Pre()
@@ -585,6 +653,8 @@ public MRESReturn DHookCallback_RoundRespawn_Pre()
 			SetEntData(populator, g_OffsetRestoringCheckpoint, true);
 		}
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_RoundRespawn_Post()
@@ -594,6 +664,8 @@ public MRESReturn DHookCallback_RoundRespawn_Post()
 	{
 		SetEntData(populator, g_OffsetRestoringCheckpoint, false);
 	}
+
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_PowerupBottle_AllowedToUse_Post(int pThis, DHookReturn ret)

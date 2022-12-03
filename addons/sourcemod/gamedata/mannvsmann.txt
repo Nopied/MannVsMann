@@ -209,8 +209,8 @@
 			}
 			"CTFGameRules::ShouldRespawnQuickly"
 			{
-				"linux"		"174"
-				"windows"	"173"
+				"linux"		"178"
+				"windows"	"177"
 			}
 			"CTFGameRules::RoundRespawn"
 			{

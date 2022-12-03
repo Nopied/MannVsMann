@@ -14,11 +14,13 @@ public any Native_GetPlayerCarteenCooldown(Handle plugin, int numParams)
     return time > 0.0 ? time : 0.0;
 }
 
-public int Native_SetPlayerCarteenCooldown(Handle plugin, int numParams)
+public /*void*/ int Native_SetPlayerCarteenCooldown(Handle plugin, int numParams)
 {
     int client = GetNativeCell(1);
     float time = GetNativeCell(2);
     MvMPlayer(client).CarteenCooldown = time + GetGameTime();
+    
+    return 0;
 }
 
 public int Native_GetPlayerCurrency(Handle plugin, int numParams)
@@ -27,14 +29,18 @@ public int Native_GetPlayerCurrency(Handle plugin, int numParams)
     return MvMPlayer(client).Currency;
 }
 
-public int Native_SetPlayerCurrency(Handle plugin, int numParams)
+public /*void*/ int Native_SetPlayerCurrency(Handle plugin, int numParams)
 {
     int client = GetNativeCell(1), currency = GetNativeCell(2);
     MvMPlayer(client).Currency = currency;
+
+    return 0;
 }
 
-public int Native_RemoveAllUpgrades(Handle plugin, int numParams)
+public /*void*/ int Native_RemoveAllUpgrades(Handle plugin, int numParams)
 {
     int client = GetNativeCell(1);
     MvMPlayer(client).RemoveAllUpgrades();
+
+    return 0;
 }

@@ -43,11 +43,11 @@ methodmap MvMPlayer
 	{
 		public get()
 		{
-			return g_PlayerRespecMenu[this];
+			return g_PlayerRespecMenu[this.Client];
 		}
 		public set(Menu menu)
 		{
-			g_PlayerRespecMenu[this] = menu;
+			g_PlayerRespecMenu[this.Client] = menu;
 		}
 	}
 
@@ -89,15 +89,15 @@ methodmap MvMPlayer
 
 	public void SetTeam(TFTeam team)
 	{
-		int count = ++g_PlayerTeamCount[this];
-		g_PlayerTeam[this][count - 1] = TF2_GetClientTeam(this.Client);
+		int count = ++g_PlayerTeamCount[this.Client];
+		g_PlayerTeam[this.Client][count - 1] = TF2_GetClientTeam(this.Client);
 		TF2_SetTeam(this.Client, team);
 	}
 
 	public void ResetTeam()
 	{
-		int count = g_PlayerTeamCount[this]--;
-		TF2_SetTeam(this.Client, g_PlayerTeam[this][count - 1]);
+		int count = g_PlayerTeamCount[this.Client]--;
+		TF2_SetTeam(this.Client, g_PlayerTeam[this.Client][count - 1]);
 	}
 
 	public void RemoveAllUpgrades()
@@ -120,11 +120,11 @@ methodmap MvMTeam
 	{
 		public get()
 		{
-			return g_TeamAcquiredCredits[this];
+			return g_TeamAcquiredCredits[view_as<int>(this)];
 		}
 		public set(int val)
 		{
-			g_TeamAcquiredCredits[this] = val;
+			g_TeamAcquiredCredits[view_as<int>(this)] = val;
 		}
 	}
 
@@ -132,11 +132,11 @@ methodmap MvMTeam
 	{
 		public get()
 		{
-			return g_TeamWorldCredits[this];
+			return g_TeamWorldCredits[view_as<int>(this)];
 		}
 		public set(int val)
 		{
-			g_TeamWorldCredits[this] = val;
+			g_TeamWorldCredits[view_as<int>(this)] = val;
 		}
 	}
 }
