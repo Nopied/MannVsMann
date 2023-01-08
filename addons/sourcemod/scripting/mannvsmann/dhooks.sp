@@ -35,15 +35,12 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_PopulationManagerUpdate_Pre, _);
 	CreateDynamicDetour(gamedata, "CPopulationManager::ResetMap", DHookCallback_PopulationManagerResetMap_Pre, DHookCallback_PopulationManagerResetMap_Post);
 	CreateDynamicDetour(gamedata, "CTFGameRules::IsQuickBuildTime", DHookCallback_IsQuickBuildTime_Pre, DHookCallback_IsQuickBuildTime_Post);
-	CreateDynamicDetour(gamedata, "CTFGameRules::GameModeUsesUpgrades", _, DHookCallback_GameModeUsesUpgrades_Post);
 	CreateDynamicDetour(gamedata, "CTFGameRules::CanPlayerUseRespec", DHookCallback_CanPlayerUseRespec_Pre, DHookCallback_CanPlayerUseRespec_Post);
 	CreateDynamicDetour(gamedata, "CTFGameRules::DistributeCurrencyAmount", DHookCallback_DistributeCurrencyAmount_Pre, DHookCallback_DistributeCurrencyAmount_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayerShared::ConditionGameRulesThink", DHookCallback_ConditionGameRulesThink_Pre, DHookCallback_ConditionGameRulesThink_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayerShared::CanRecieveMedigunChargeEffect", DHookCallback_CanRecieveMedigunChargeEffect_Pre, DHookCallback_CanRecieveMedigunChargeEffect_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayerShared::RadiusSpyScan", DHookCallback_RadiusSpyScan_Pre, DHookCallback_RadiusSpyScan_Post);
-	CreateDynamicDetour(gamedata, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre, DHookCallback_RemoveAllOwnedEntitiesFromWorld_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::CanBuild", DHookCallback_CanBuild_Pre, DHookCallback_CanBuild_Post);
-	CreateDynamicDetour(gamedata, "CTFPlayer::ManageRegularWeapons", DHookCallback_ManageRegularWeapons_Pre, DHookCallback_ManageRegularWeapons_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::RegenThink", DHookCallback_RegenThink_Pre, DHookCallback_RegenThink_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::Regenerate", DHookCallback_Regenerate_Pre);
 	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
@@ -186,12 +183,6 @@ public MRESReturn DHookCallback_IsQuickBuildTime_Post()
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_GameModeUsesUpgrades_Post(DHookReturn ret)
-{
-	//Fixes various upgrades and enables a few MvM-related features
-	ret.Value = true;
-	return MRES_Supercede;
-}
 
 public MRESReturn DHookCallback_CanPlayerUseRespec_Pre()
 {
@@ -347,27 +338,6 @@ public MRESReturn DHookCallback_RadiusSpyScan_Post(Address playerShared)
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int client)
-{
-	//MvM invaders are allowed to keep their buildings and we don't want that, move the player to the defender team
-	if (IsMannVsMachineMode())
-	{
-		MvMPlayer(client).SetTeam(TFTeam_Red);
-	}
-
-	return MRES_Ignored;
-}
-
-public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Post(int client)
-{
-	if (IsMannVsMachineMode())
-	{
-		MvMPlayer(client).ResetTeam();
-	}
-
-	return MRES_Ignored;
-}
-
 public MRESReturn DHookCallback_CanBuild_Pre()
 {
 	//Limits the amount of sappers that can be placed on players
@@ -377,21 +347,6 @@ public MRESReturn DHookCallback_CanBuild_Pre()
 }
 
 public MRESReturn DHookCallback_CanBuild_Post()
-{
-	ResetMannVsMachineMode();
-
-	return MRES_Ignored;
-}
-
-public MRESReturn DHookCallback_ManageRegularWeapons_Pre()
-{
-	//Allows the call to CTFPlayer::ReapplyPlayerUpgrades to happen
-	SetMannVsMachineMode(true);
-
-	return MRES_Ignored;
-}
-
-public MRESReturn DHookCallback_ManageRegularWeapons_Post()
 {
 	ResetMannVsMachineMode();
 

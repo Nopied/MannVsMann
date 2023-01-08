@@ -4,11 +4,6 @@
 	{
 		"Signatures"
 		{
-			"CUpgrades::ApplyUpgradeToItem"
-			{
-				"linux"		"@_ZN9CUpgrades18ApplyUpgradeToItemEP9CTFPlayerP13CEconItemViewiibb"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x57\x8B\x7D\x08\x89\x4D\xF8"
-			}
 			"CUpgrades::PlayerPurchasingUpgrade"
 			{
 				"linux"		"@_ZN9CUpgrades23PlayerPurchasingUpgradeEP9CTFPlayeriibbb"
@@ -38,11 +33,6 @@
 			{
 				"linux"		"@_ZN12CTFGameRules16IsQuickBuildTimeEv"
 				"windows"	"\x80\xB9\x66\x09\x00\x00\x00\x74\x2A\x80\xB9\x79\x03\x00\x00\x00"
-			}
-			"CTFGameRules::GameModeUsesUpgrades"
-			{
-				"linux"		"@_ZN12CTFGameRules20GameModeUsesUpgradesEv"
-				"windows"	"\x80\xB9\x66\x09\x00\x00\x00\x0F\x95\xC0"
 			}
 			"CTFGameRules::CanPlayerUseRespec"
 			{
@@ -79,11 +69,6 @@
 				"linux"		"@_ZN15CTFPlayerShared13RadiusSpyScanEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x56\x8B\xF1\x89\x75\xFC"
 			}
-			"CTFPlayer::RemoveAllOwnedEntitiesFromWorld"
-			{
-				"linux"		"@_ZN9CTFPlayer31RemoveAllOwnedEntitiesFromWorldEb"
-				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\xE8\x2A\x2A\x2A\x2A\xA1\x2A\x2A\x2A\x2A"
-			}
 			"CTFPlayer::CanBuild"
 			{
 				"linux"		"@_ZN9CTFPlayer8CanBuildEii"
@@ -98,11 +83,6 @@
 			{
 				"linux"		"@_ZN9CTFPlayer33GetEquippedWearableForLoadoutSlotEi"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x2A\x8B\xC1\x53\x56\x33\xF6\x89\x45\xF8\x8B\x88\x2A\x2A\x2A\x2A\x57\x89\x4D\xFC"
-			}
-			"CTFPlayer::ManageRegularWeapons"
-			{
-				"linux"		"@_ZN9CTFPlayer20ManageRegularWeaponsEP19TFPlayerClassData_t"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x6C\x53\x56\x57\x8B\xF9\xE8\x2A\x2A\x2A\x2A"
 			}
 			"CTFPlayer::RegenThink"
 			{
@@ -241,40 +221,6 @@
 		}
 		"Functions"
 		{
-			"CUpgrades::ApplyUpgradeToItem"
-			{
-				"signature"	"CUpgrades::ApplyUpgradeToItem"
-				"callconv"	"thiscall"
-				"return"	"int"
-				"this"		"entity"
-				"arguments"
-				{
-					"pTFPlayer"
-					{
-						"type"	"cbaseentity"
-					}
-					"pView"
-					{
-						"type"	"int"
-					}
-					"iUpgrade"
-					{
-						"type"	"int"
-					}
-					"nCost"
-					{
-						"type"	"int"
-					}
-					"bDowngrade"
-					{
-						"type"	"bool"
-					}
-					"bIsFresh"
-					{
-						"type"	"bool"
-					}
-				}
-			}
 			"CUpgrades::PlayerPurchasingUpgrade"
 			{
 				"signature"	"CUpgrades::PlayerPurchasingUpgrade"
@@ -326,13 +272,6 @@
 			"CTFGameRules::IsQuickBuildTime"
 			{
 				"signature"	"CTFGameRules::IsQuickBuildTime"
-				"callconv"	"thiscall"
-				"return"	"bool"
-				"this"		"ignore"
-			}
-			"CTFGameRules::GameModeUsesUpgrades"
-			{
-				"signature"	"CTFGameRules::GameModeUsesUpgrades"
 				"callconv"	"thiscall"
 				"return"	"bool"
 				"this"		"ignore"
@@ -435,20 +374,6 @@
 				"return"	"void"
 				"this"		"address"
 			}
-			"CTFPlayer::RemoveAllOwnedEntitiesFromWorld"
-			{
-				"signature"	"CTFPlayer::RemoveAllOwnedEntitiesFromWorld"
-				"callconv"	"thiscall"
-				"return"	"void"
-				"this"		"entity"
-				"arguments"
-				{
-					"bExplodeBuildings"
-					{
-						"type"	"bool"
-					}
-				}
-			}
 			"CTFPlayer::CanBuild"
 			{
 				"signature"	"CTFPlayer::CanBuild"
@@ -462,20 +387,6 @@
 						"type"	"int"
 					}
 					"iObjectMode"
-					{
-						"type"	"int"
-					}
-				}
-			}
-			"CTFPlayer::ManageRegularWeapons"
-			{
-				"signature"	"CTFPlayer::ManageRegularWeapons"
-				"callconv"	"thiscall"
-				"return"	"void"
-				"this"		"entity"
-				"arguments"
-				{
-					"pData"
 					{
 						"type"	"int"
 					}

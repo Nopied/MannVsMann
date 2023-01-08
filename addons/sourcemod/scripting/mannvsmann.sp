@@ -226,6 +226,10 @@ public void OnPluginEnd()
 	{
 		RemoveEntity(marker);
 	}
+
+	// Disable upgrades
+	SetVariantString("ForceEnableUpgrades(0)");
+	AcceptEntityInput(0, "RunScriptCode");
 }
 
 public void OnMapStart()
@@ -248,6 +252,9 @@ public void OnMapStart()
 
 	//An info_populator entity is required for a lot of MvM-related stuff (preserved entity)
 	CreateEntityByName("info_populator");
+
+	SetVariantString("ForceEnableUpgrades(2)");
+	AcceptEntityInput(0, "RunScriptCode");
 }
 
 public Action OnTouchUpgradeStation(int upgradeStation, int other)
@@ -386,9 +393,6 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 	{
 		if (strncmp(section, "MvM_", 4, false) == 0)
 		{
-			//Enable MvM for client commands to be processed in CTFGameRules::ClientCommandKeyValues
-			SetMannVsMachineMode(true);
-
 			if (strcmp(section, "MvM_UpgradesBegin") == 0)
 			{
 				if(mvm_disable_respec_menu.BoolValue)	return Plugin_Continue;
@@ -408,11 +412,16 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 					delete menu;
 				}
 			}
-			else if (strcmp(section, "MvM_UpgradesDone") == 0)
+			else if (strcmp(section, "MvM_UpgradesDone") == 0
+				&& kv.GetNum("num_upgrades", 0) > 0)
 			{
 				//Enable upgrade voice lines
 				SetVariantString("IsMvMDefender:1");
 				AcceptEntityInput(client, "AddContext");
+				SetVariantString("TLK_MVM_UPGRADE_COMPLETE");
+				AcceptEntityInput(client, "SpeakResponseConcept");
+				AcceptEntityInput(client, "ClearContext");
+
 				SetEntProp(client, Prop_Send, "m_bInUpgradeZone", 0);
 
 				//Cancel and reset refund menu
@@ -461,28 +470,17 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 		else if(strcmp(section, "-inspect_server") == 0)
 		{
 			SetEntProp(client, Prop_Send, "m_bInUpgradeZone", 0);
+
+			int currentWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+			if(IsValidEntity(currentWeapon))
+			{
+				SetEntProp(currentWeapon, Prop_Send, "m_nInspectStage", -1);
+				SetEntPropFloat(currentWeapon, Prop_Send, "m_flInspectAnimEndTime", 0.0);
+			}
 		}
 	}
 
 	return Plugin_Continue;
-}
-
-public void OnClientCommandKeyValues_Post(int client, KeyValues kv)
-{
-	if (IsMannVsMachineMode())
-	{
-		ResetMannVsMachineMode();
-
-		char section[32];
-		if (kv.GetSectionName(section, sizeof(section)))
-		{
-			if (strcmp(section, "MvM_UpgradesDone") == 0)
-			{
-				SetVariantString("IsMvMDefender");
-				AcceptEntityInput(client, "RemoveContext");
-			}
-		}
-	}
 }
 
 public void TF2_OnConditionAdded(int client, TFCond condition)

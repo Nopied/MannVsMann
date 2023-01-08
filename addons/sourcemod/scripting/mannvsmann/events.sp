@@ -142,13 +142,6 @@ public void Event_PostInventoryApplication(Event event, const char[] name, bool 
 
 public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
-	/* 
-	// Never do this for mass-switches as it may lead to reliable buffer overflows
-	// yeah. This caused to crash when some people spawn at same time. (like FF2's minion spawn)
-	if (SDKCall_ShouldSwitchTeams() || SDKCall_ShouldScrambleTeams())
-		return;
-	*/
-
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
 
