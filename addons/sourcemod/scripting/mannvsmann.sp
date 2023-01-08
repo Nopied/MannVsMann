@@ -393,7 +393,12 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 	{
 		if (strncmp(section, "MvM_", 4, false) == 0)
 		{
-			if (strcmp(section, "MvM_UpgradesBegin") == 0)
+			if (!strcmp(section, "MVM_Upgrade"))
+			{
+				// Required for tracking of spent currency
+				SetMannVsMachineMode(true);
+			}
+			else if (strcmp(section, "MvM_UpgradesBegin") == 0)
 			{
 				if(mvm_disable_respec_menu.BoolValue)	return Plugin_Continue;
 
@@ -481,6 +486,14 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 	}
 
 	return Plugin_Continue;
+}
+
+public void OnClientCommandKeyValues_Post(int client, KeyValues kv)
+{
+	if (IsMannVsMachineMode())
+	{
+		ResetMannVsMachineMode();
+	}
 }
 
 public void TF2_OnConditionAdded(int client, TFCond condition)
