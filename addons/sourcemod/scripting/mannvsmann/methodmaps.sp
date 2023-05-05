@@ -103,9 +103,8 @@ methodmap MvMPlayer
 	public void RemoveAllUpgrades()
 	{
 		//This clears the upgrade history and removes upgrade attributes from the player and their items
-		KeyValues respec = new KeyValues("MVM_Respec");
-		FakeClientCommandKeyValues(this.Client, respec);
-		delete respec;
+		SetVariantString("!self.GrantOrRemoveAllUpgrades(true, true)");
+		AcceptEntityInput(this.Client, "RunScriptCode");
 	}
 }
 
