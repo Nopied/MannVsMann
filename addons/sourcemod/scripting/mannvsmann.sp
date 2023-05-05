@@ -37,6 +37,7 @@
 
 #define UPGRADE_STATION_MODEL	"models/error.mdl"
 #define SOUND_CREDITS_UPDATED	"ui/credits_updated.wav"
+#define SOUND_BUY_UPGRADE		")mvm/mvm_bought_upgrade.wav"
 
 const TFTeam TFTeam_Invalid = view_as<TFTeam>(-1);
 
@@ -546,6 +547,11 @@ public Action NormalSoundHook(int clients[MAXPLAYERS], int &numClients, char sam
 			}
 		}
 	}
+
+	if(StrEqual(SOUND_BUY_UPGRADE, sample)
+		&& IsValidClient(entity)
+		&& (/*CheckRoundState() < 1 ||*/ GetEntProp(entity, Prop_Send, "m_bInUpgradeZone") == 0))
+		return Plugin_Handled;
 
 	return action;
 }
