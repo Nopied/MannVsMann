@@ -572,16 +572,22 @@ public int MenuHandler_UpgradeRespec(Menu menu, MenuAction action, int param1, i
 			{
 				if (strcmp(info, "respec") == 0)
 				{
-					MvMPlayer(param1).RemoveAllUpgrades();
+					// FIXME: 사용한 수통은 초기화되지 않고 자금 사용량에서 차감되지도 않음
+					// MvMPlayer(param1).Currency += spentCurrency;
+					MvMPlayer(param1).Currency = mvm_starting_currency.IntValue;
 
+					MvMPlayer(param1).RemoveAllUpgrades();
+					SetEntProp(param1, Prop_Send, "m_bInUpgradeZone", false);
+/*
 					int populator = FindEntityByClassname(MaxClients + 1, "info_populator");
 					if (populator != -1)
 					{
 						//This should put us at the right currency, given that we've removed item and player upgrade tracking by this point
-						int totalAcquiredCurrency = MvMTeam(TF2_GetClientTeam(param1)).AcquiredCredits + mvm_starting_currency.IntValue;
-						int spentCurrency = SDKCall_GetPlayerCurrencySpent(populator, param1);
-						MvMPlayer(param1).Currency = totalAcquiredCurrency - spentCurrency;
+						// int totalAcquiredCurrency = MvMTeam(TF2_GetClientTeam(param1)).AcquiredCredits + mvm_starting_currency.IntValue;
+						// int spentCurrency = SDKCall_GetPlayerCurrencySpent(populator, param1);
+						// MvMPlayer(param1).Currency = totalAcquiredCurrency - spentCurrency;	
 					}
+*/
 				}
 			}
 		}
