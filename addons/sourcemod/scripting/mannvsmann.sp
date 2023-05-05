@@ -396,7 +396,8 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 			}
 			else if (strcmp(section, "MvM_UpgradesBegin") == 0)
 			{
-				if(mvm_disable_respec_menu.BoolValue)	return Plugin_Continue;
+				if(mvm_disable_respec_menu.BoolValue
+					|| CheckRoundState() == 1)	return Plugin_Continue;
 
 				//Create a menu to substitute client-side "Refund Upgrades" button
 				Menu menu = new Menu(MenuHandler_UpgradeRespec, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
@@ -563,6 +564,8 @@ public int MenuHandler_UpgradeRespec(Menu menu, MenuAction action, int param1, i
 		case MenuAction_Select:
 		{
 			MvMPlayer(param1).RespecMenu = null;
+
+			if(CheckRoundState() == 1)	return 0;
 
 			char info[64];
 			if (menu.GetItem(param2, info, sizeof(info)))
