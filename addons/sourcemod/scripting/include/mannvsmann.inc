@@ -16,50 +16,54 @@ enum CurrencyRewards
 
 // TODO: methodmap support
 
-/*
-    Get/set player's carteen cooldown
-
-    @param client   player's index
-    @param time     cooldown time
-*/
+/**
+ * Get/set player's carteen cooldown
+ * 
+ * @param client   player's index
+ * @param time     cooldown time
+ */
 native float MVM_GetPlayerCarteenCooldown(int client);
 native void MVM_SetPlayerCarteenCooldown(int client, float time);
 
-/*
-*   Get player's currency spent
-*
-*   @param client       player's index
-*
-*   @return player's currency spent 
-*/
+/**
+ * Get player's currency spent
+ * 
+ * @param client       player's index
+ * 
+ * @return player's currency spent 
+ * 
+ */
 native int MVM_GetPlayerCurrencySpent(int client);
 
-/*
-    Get player's currency
-
-    @param client       player's index
-
-    @return player's currency
-*/
+/**
+ * Get player's currency
+ * 
+ * @param client       player's index
+ * 
+ * @return player's currency
+ * 
+ */
 native int MVM_GetPlayerCurrency(int client);
 
-/*
-    Set player's currency
-
-    @param client       player's index
-    @param currency     currency value
-
-    @noreturn
-*/
+/**
+ * Set player's currency
+ * 
+ * @param client       player's index
+ * @param currency     currency value
+ * 
+ * @noreturn
+ * 
+ */
 native void MVM_SetPlayerCurrency(int client, int currency);
 
-/*
-    Remove All of player's upgrade
-
-    @param client       player's index
-
-    @noreturn
-*/
+/**
+ * Remove All of player's upgrade
+ * 
+ * @param client       player's index
+ * 
+ * @noreturn
+ * 
+ */
 native void MVM_RemoveAllUpgrades(int client);
 
 /**
@@ -73,33 +77,35 @@ native void MVM_RemoveAllUpgrades(int client);
  * @param team only visible for specific team
  * 
  * @noreturn
- *  
+ * 
  */
 native void MVM_DropCurrency(int player, CurrencyRewards size = TF_CURRENCY_PACK_SMALL, int amount = 0, bool forceDistribute = false, int moneyMaker = -1, TFTeam team = view_as<TFTeam>(-1));
 
-/*
-    Called when player starting touch or touching the upgrade station
-
-    @param upgradeStation       upgradeStation's index
-    @param client               player's index
-
-    @return
-        Plugin_Continue       Player will be able to access to upgrade menu.
-        Otherwise               Player will NOT be able to access to upgrade menu.
-*/
+/**
+ * Called when player starting touch or touching the upgrade station
+ * 
+ * @param upgradeStation       upgradeStation's index
+ * @param client               player's index
+ * 
+ * @return
+ *      Plugin_Continue         Player will be able to access to upgrade menu.
+ *      Otherwise               Player will NOT be able to access to upgrade menu.
+ * 
+ */
 forward Action MVM_OnTouchedUpgradeStation(int upgradeStation, int client);
 
-/*
-    Called when player starting touch or touching the currency
-
-    @param upgradeStation       currency's index
-    @param client               player's index
-
-    @return
-        Plugin_Continue         Player will be able to access to currency.
-        Plugin_Changed          Overwrite result.
-        Otherwise               Player will NOT be able to access to currency.
-*/
+/**
+ * Called when player starting touch or touching the currency
+ * 
+ * @param upgradeStation       currency's index
+ * @param client               player's index
+ * 
+ * @return
+ *      Plugin_Continue         Player will be able to access to currency.
+ *      Plugin_Changed          Overwrite result.
+ *      Otherwise               Player will NOT be able to access to currency.
+ * 
+ */
 forward Action MVM_OnTouchedMoney(int money, int client);
 
 stock bool IsMannVsMachineMode()
