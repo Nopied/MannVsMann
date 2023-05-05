@@ -27,6 +27,7 @@ static Handle g_SDKCallGetBaseEntity;
 static Handle g_SDKCallShouldSwitchTeams;
 // static Handle g_SDKCallShouldScrambleTeams;
 static Handle g_SDKCallGetNextRespawnWave;
+static Handle g_SDKCallReapplyPlayerUpgrade;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -42,6 +43,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallShouldSwitchTeams = PrepSDKCall_ShouldSwitchTeams(gamedata);
 	// g_SDKCallShouldScrambleTeams = PrepSDKCall_ShouldScrambleTeams(gamedata);
 	g_SDKCallGetNextRespawnWave = PrepSDKCall_GetNextRespawnWave(gamedata);
+	g_SDKCallReapplyPlayerUpgrade = PrepSDKCall_ReapplyPlayerUpgrade(gamedata);
 }
 
 Handle PrepSDKCall_ResetMap(GameData gamedata)
@@ -211,6 +213,19 @@ Handle PrepSDKCall_GetNextRespawnWave(GameData gamedata)
 	return call;
 }
 
+Handle PrepSDKCall_ReapplyPlayerUpgrade(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::ReapplyPlayerUpgrades");
+
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDK call: CTFPlayer::ReapplyPlayerUpgrades");
+
+	return call;
+}
+
+
 void SDKCall_ResetMap(int populator)
 {
 	if (g_SDKCallResetMap)
@@ -299,4 +314,10 @@ float SDKCall_GetNextRespawnWave(int team, int player)
 		return SDKCall(g_SDKCallGetNextRespawnWave, team, player);
 
 	return 0.0;
+}
+
+void SDKCall_ReapplyPlayerUpgrades(int client)
+{
+	if(g_SDKCallReapplyPlayerUpgrade)
+		SDKCall(g_SDKCallReapplyPlayerUpgrade, client);
 }

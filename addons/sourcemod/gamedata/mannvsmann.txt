@@ -149,6 +149,11 @@
 				"linux"		"@_ZN28CMannVsMachineUpgradeManager24LoadUpgradesFileFromPathEPKc"
 				"windows"	" "
 			}
+			"CTFPlayer::ReapplyPlayerUpgrades"
+			{
+				"linux"		"@_ZN9CTFPlayer21ReapplyPlayerUpgradesEv"
+				"windows"	" "
+			}
 		}
 		"Offsets"
 		{

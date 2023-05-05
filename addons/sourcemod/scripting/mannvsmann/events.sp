@@ -170,6 +170,9 @@ public void Event_PlayerSpawn_Pre(Event event, const char[] name, bool dontBroad
 public void Event_PlayerSpawn_Post(Event event, const char[] name, bool dontBroadcast)
 {
 	ResetMannVsMachineMode();
+	
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	SDKCall_ReapplyPlayerUpgrades(client);
 }
 
 public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
