@@ -240,7 +240,10 @@ public void OnMapStart()
 
 	DHooks_HookGameRules();
 
-	DispatchSpawn(CreateEntityByName("func_upgradestation"));
+	// Set solid type to SOLID_NONE to suppress warnings
+	int upgradestation = CreateEntityByName("func_upgradestation");
+	SetEntProp(upgradestation, Prop_Send, "m_nSolidType", 0); // SOLID_NONE
+	DispatchSpawn(upgradestation);
 
 	//Set custom upgrades file on level init
 	char path[PLATFORM_MAX_PATH];
