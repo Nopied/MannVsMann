@@ -26,6 +26,15 @@ native float MVM_GetPlayerCarteenCooldown(int client);
 native void MVM_SetPlayerCarteenCooldown(int client, float time);
 
 /*
+*   Get player's currency spent
+*
+*   @param client       player's index
+*
+*   @return player's currency spent 
+*/
+native int MVM_GetPlayerCurrencySpent(int client);
+
+/*
     Get player's currency
 
     @param client       player's index
@@ -52,6 +61,21 @@ native void MVM_SetPlayerCurrency(int client, int currency);
     @noreturn
 */
 native void MVM_RemoveAllUpgrades(int client);
+
+/**
+ * Drop currency for team
+ * 
+ * @param player currency pos
+ * @param size see CurrencyRewards
+ * @param amount amount of money 
+ * @param forceDistribute true = red money (sniper reward)
+ * @param moneyMaker TODO: Unknown
+ * @param team only visible for specific team
+ * 
+ * @noreturn
+ *  
+ */
+native void MVM_DropCurrency(int player, CurrencyRewards size = TF_CURRENCY_PACK_SMALL, int amount = 0, bool forceDistribute = false, int moneyMaker = -1, TFTeam team = view_as<TFTeam>(-1));
 
 /*
     Called when player starting touch or touching the upgrade station
@@ -112,8 +136,10 @@ public __pl_MVM_SetNTVOptional()
 {
     MarkNativeAsOptional("MVM_GetPlayerCarteenCooldown");
     MarkNativeAsOptional("MVM_SetPlayerCarteenCooldown");
+    MarkNativeAsOptional("MVM_GetPlayerCurrencySpent");
     MarkNativeAsOptional("MVM_GetPlayerCurrency");
     MarkNativeAsOptional("MVM_SetPlayerCurrency");
     MarkNativeAsOptional("MVM_RemoveAllUpgrades");
+    MarkNativeAsOptional("MVM_DropCurrency");
 }
 #endif
