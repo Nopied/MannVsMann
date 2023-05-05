@@ -40,14 +40,6 @@
 
 const TFTeam TFTeam_Invalid = view_as<TFTeam>(-1);
 
-enum CurrencyRewards
-{
-	TF_CURRENCY_PACK_SMALL = 6,
-	TF_CURRENCY_PACK_MEDIUM,
-	TF_CURRENCY_PACK_LARGE,
-	TF_CURRENCY_PACK_CUSTOM
-}
-
 //ConVars
 ConVar mvm_starting_currency;
 ConVar mvm_currency_rewards_player_killed;

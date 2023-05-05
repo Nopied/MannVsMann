@@ -6,6 +6,14 @@
 static int g_IsMannVsMachineModeCount;
 static bool g_IsMannVsMachineModeState[8];
 
+enum CurrencyRewards
+{
+	TF_CURRENCY_PACK_SMALL = 6,
+	TF_CURRENCY_PACK_MEDIUM,
+	TF_CURRENCY_PACK_LARGE,
+	TF_CURRENCY_PACK_CUSTOM
+}
+
 // TODO: methodmap support
 
 /*
