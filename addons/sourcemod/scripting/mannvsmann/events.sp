@@ -126,6 +126,12 @@ public void Event_TeamplayRoundStart(Event event, const char[] name, bool dontBr
 	for(int client = 1; client <= MaxClients; client++)
 	{
 		MvMPlayer(client).ReviveThinkCooldown = 0.0;
+
+		if(!IsClientInGame(client))		continue;
+
+		TFClassType class = TF2_GetPlayerClass(client);
+		TF2_SetPlayerClass(client, TFClass_Unknown);
+		TF2_SetPlayerClass(client, class);
 	}
 }
 
@@ -164,7 +170,7 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 
 public void Event_PlayerSpawn_Pre(Event event, const char[] name, bool dontBroadcast)
 {
-	SetMannVsMachineMode(false);
+	SetMannVsMachineMode(true);
 }
 
 public void Event_PlayerSpawn_Post(Event event, const char[] name, bool dontBroadcast)

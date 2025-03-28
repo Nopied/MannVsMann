@@ -725,3 +725,11 @@ public MRESReturn DHookCallback_Medigun_SubtractChargeAndUpdateDeployState_Pre(i
 
 	return MRES_ChangedOverride;
 }
+
+// public MRESReturn DHookCallback_PopulationManager_IsInEndlessWaves()
+// {
+// 	if(g_bSpawning)
+// 		return MRES_Supercede;
+
+// 	return MRES_Ignored;
+// }
