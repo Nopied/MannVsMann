@@ -179,28 +179,28 @@
 			}
 			"CTFGameRules::ShouldSwitchTeams"
 			{
-				"linux"		"164"
-				"windows"	"163"
+				"linux"		"169"
+				"windows"	"168"
 			}
 			"CTFGameRules::ShouldScrambleTeams"
 			{
-				"linux"		"168"
-				"windows"	"167"
+				"linux"		"172"
+				"windows"	"171"
 			}
 			"CTFGameRules::GetNextRespawnWave"
 			{
-				"linux"		"174"
-				"windows"	"173"
+				"linux"		"175"
+				"windows"	"174"
 			}
 			"CTFGameRules::ShouldRespawnQuickly"
 			{
-				"linux"		"178"
-				"windows"	"177"
+				"linux"		"179"
+				"windows"	"178"
 			}
 			"CTFGameRules::RoundRespawn"
 			{
-				"linux"		"231"
-				"windows"	"229"
+				"linux"		"232"
+				"windows"	"230"
 			}
 			"CTFPlayerShared::m_pOuter"
 			{
@@ -209,19 +209,23 @@
 			}
 			"CTFPlayer::m_hReviveMarker"
 			{
-				"linux"		"9468"
-				// "windows"	"9140"
+				"linux"		"336"
+				"windows"	"336"
 			}
 			"CCurrencyPack::m_nAmount"
 			{
-				"linux"		"1332"
-				// "windows"	"1256"
+				"linux"		"-26"
+				"windows"	"-26"
 			}
 			"CPopulationManager::m_isRestoringCheckpoint"
 			{
-				// OUTDATED
-				"linux"		"1512"
-				"windows"	"1492"
+				"linux"		"704"
+				"windows"	"704"
+			}
+			"CTFPlayer::m_bSwitchedClass"
+			{
+				"linux"		"34"
+				// "windows"	"704"
 			}
 		}
 		"Functions"
