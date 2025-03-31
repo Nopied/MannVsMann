@@ -107,8 +107,8 @@ public void CurrencyPack_SpawnPost(int currencypack)
 	//Add the currency value to the world money
 	if (!GetEntProp(currencypack, Prop_Send, "m_bDistributed"))
 	{
-		TFTeam team = TF2_GetTeam(currencypack);
-		MvMTeam(team).WorldCredits += GetEntData(currencypack, g_OffsetCurrencyPackAmount);
+		// TFTeam team = TF2_GetTeam(currencypack);
+		// MvMTeam(team).WorldCredits += GetEntData(currencypack, GetOffset("CCurrencyPack", "m_nAmount"));
 	}
 
 	SetEdictFlags(currencypack, (GetEdictFlags(currencypack) & ~FL_EDICT_ALWAYS));

@@ -63,9 +63,9 @@ TFTeam g_CurrencyPackTeam;
 
 //Offsets
 int g_OffsetPlayerSharedOuter;
-int g_OffsetPlayerReviveMarker;
-int g_OffsetCurrencyPackAmount;
-int g_OffsetRestoringCheckpoint;
+// int g_OffsetPlayerReviveMarker;
+// int g_OffsetCurrencyPackAmount;
+// int g_OffsetRestoringCheckpoint;
 
 //Other globals
 // ArrayList g_hCornerList;
@@ -80,6 +80,7 @@ bool g_ForceMapReset;
 #include "mannvsmann/dhooks.sp"
 #include "mannvsmann/events.sp"
 #include "mannvsmann/helpers.sp"
+#include "mannvsmann/offsets.sp"
 #include "mannvsmann/patches.sp"
 #include "mannvsmann/sdkhooks.sp"
 #include "mannvsmann/sdkcalls.sp"
@@ -146,6 +147,7 @@ public void OnPluginStart()
 		DHooks_Initialize(gamedata);
 		Patches_Initialize(gamedata);
 		SDKCalls_Initialize(gamedata);
+		Offsets_Init(gamedata);
 
 		g_OffsetPlayerSharedOuter = gamedata.GetOffset("CTFPlayerShared::m_pOuter");
 		// g_OffsetPlayerReviveMarker = gamedata.GetOffset("CTFPlayer::m_hReviveMarker");
@@ -341,7 +343,7 @@ public void OnEntityDestroyed(int entity)
 		if (!GetEntProp(entity, Prop_Send, "m_bDistributed"))
 		{
 			TFTeam team = TF2_GetTeam(entity);
-			MvMTeam(team).WorldCredits -= GetEntData(entity, g_OffsetCurrencyPackAmount);
+			MvMTeam(team).WorldCredits -= GetEntData(entity, GetOffset("CCurrencyPack", "m_nAmount"));
 		}
 	}
 }

@@ -248,7 +248,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 		if (mvm_drop_revivemarker.BoolValue && !(death_flags & TF_DEATHFLAG_DEADRINGER) && !silent_kill)
 		{
 			//Create revive marker
-			SetEntDataEnt2(victim, g_OffsetPlayerReviveMarker, SDKCall_ReviveMarkerCreate(victim));
+			SetEntDataEnt2(victim, GetOffset("CTFPlayer", "m_hReviveMarker"), SDKCall_ReviveMarkerCreate(victim));
 		}
 	}
 }

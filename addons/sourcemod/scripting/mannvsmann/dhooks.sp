@@ -605,7 +605,7 @@ public MRESReturn DHookCallback_RoundRespawn_Pre()
 		else
 		{
 			//Retain player upgrades (forces a call to CTFPlayer::ReapplyPlayerUpgrades)
-			SetEntData(populator, g_OffsetRestoringCheckpoint, true);
+			SetEntData(populator, GetOffset("CPopulationManager", "m_isRestoringCheckpoint"), true, 1);
 		}
 	}
 
@@ -617,7 +617,7 @@ public MRESReturn DHookCallback_RoundRespawn_Post()
 	int populator = FindEntityByClassname(MaxClients + 1, "info_populator");
 	if (populator != -1)
 	{
-		SetEntData(populator, g_OffsetRestoringCheckpoint, false);
+		SetEntData(populator, GetOffset("CPopulationManager", "m_isRestoringCheckpoint"), false, 1);
 	}
 
 	return MRES_Ignored;
