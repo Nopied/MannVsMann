@@ -49,6 +49,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFPowerupBottle::AllowedToUse", _, DHookCallback_PowerupBottle_AllowedToUse_Post);
 	CreateDynamicDetour(gamedata, "CWeaponMedigun::HealTargetThink", DHookCallback_Medigun_HealTargetThink_Pre, DHookCallback_Medigun_HealTargetThink_Post);
 	CreateDynamicDetour(gamedata, "CWeaponMedigun::SubtractChargeAndUpdateDeployState", DHookCallback_Medigun_SubtractChargeAndUpdateDeployState_Pre);
+//	CreateDynamicDetour(gamedata, "CPopulationManager::IsInEndlessWaves", DHookCallback_PopulationManager_IsInEndlessWaves);
 
 	g_DHookMyTouch = CreateDynamicHook(gamedata, "CCurrencyPack::MyTouch");
 	g_DHookComeToRest = CreateDynamicHook(gamedata, "CCurrencyPack::ComeToRest");
