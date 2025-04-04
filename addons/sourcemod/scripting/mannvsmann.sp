@@ -469,7 +469,9 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 		else if(strcmp(section, "+inspect_server") == 0)
 		{
 			if(OnTouchUpgradeStation(-1, client) == Plugin_Continue)
+			{
 				SetEntProp(client, Prop_Send, "m_bInUpgradeZone", 1);
+			}
 		}
 		else if(strcmp(section, "-inspect_server") == 0)
 		{

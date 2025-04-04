@@ -28,6 +28,7 @@ static TFTeam g_PreHookTeam;	//Note: For clients, use the MvMPlayer methodmap
 
 //Hook some functions
 static bool g_bComeToRest = false;
+// static bool g_bSpawning = false;
 
 void DHooks_Initialize(GameData gamedata)
 {
