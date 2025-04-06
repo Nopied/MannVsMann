@@ -282,8 +282,15 @@ public Action OnTouchUpgradeStation(int upgradeStation, int other)
 
 public void OnClientPutInServer(int client)
 {
+	RespecClient(client, false);
+
 	MvMPlayer(client).CarteenCooldown = 0.0;
 	MvMPlayer(client).Currency = mvm_starting_currency.IntValue + RoundFloat(GetEngineTime());
+
+	int populator = FindEntityByClassname(MaxClients + 1, "info_populator"),
+		spentCurrency = SDKCall_GetPlayerCurrencySpent(populator, client);
+		
+	SDKCall_AddPlayerCurrencySpent(populator, client, -spentCurrency);
 
 	SDKHooks_HookClient(client);
 }
@@ -590,17 +597,20 @@ public int MenuHandler_UpgradeRespec(Menu menu, MenuAction action, int param1, i
 	return 0;
 }
 
-void RespecClient(int client)
+void RespecClient(int client, bool resetCurrency = true)
 {
 	MvMPlayer(client).RemoveAllUpgrades();
 	
 	int populator = FindEntityByClassname(MaxClients + 1, "info_populator");
 	if (populator != -1)
 	{
-		//This should put us at the right currency, given that we've removed item and player upgrade tracking by this point
-		int totalAcquiredCurrency = MvMTeam(TF2_GetClientTeam(client)).AcquiredCredits + mvm_starting_currency.IntValue;
-		int spentCurrency = SDKCall_GetPlayerCurrencySpent(populator, client);
-		MvMPlayer(client).Currency = totalAcquiredCurrency - spentCurrency;	
+		if(resetCurrency)
+		{
+			//This should put us at the right currency, given that we've removed item and player upgrade tracking by this point
+			int totalAcquiredCurrency = MvMTeam(TF2_GetClientTeam(client)).AcquiredCredits + mvm_starting_currency.IntValue;
+			int spentCurrency = SDKCall_GetPlayerCurrencySpent(populator, client);
+			MvMPlayer(client).Currency = totalAcquiredCurrency - spentCurrency;	
+		}
 
 		SetEntProp(client, Prop_Send, "m_bInUpgradeZone", false);
 	}
