@@ -49,7 +49,6 @@ ConVar mvm_currency_rewards_player_count_bonus;
 ConVar mvm_reset_on_round_end;
 ConVar mvm_spawn_protection;
 ConVar mvm_disable_hud_currency;
-ConVar mvm_disable_respec_menu;
 ConVar mvm_drop_revivemarker;
 ConVar mvm_enable_music;
 ConVar mvm_carteen_cooldown;
@@ -122,7 +121,6 @@ public void OnPluginStart()
 	mvm_reset_on_round_end = CreateConVar("mvm_reset_on_round_end", "1", "When set to 1, player upgrades and cash will reset when a full round has been played.");
 	mvm_spawn_protection = CreateConVar("mvm_spawn_protection", "0", "When set to 1, players are granted ubercharge while they leave their spawn.");
 	mvm_disable_hud_currency = CreateConVar("mvm_disable_hud_currency", "1", "When set to 1, disabled currency HUD.");
-	mvm_disable_respec_menu = CreateConVar("mvm_disable_respec_menu", "1", "When set to 1, disabled respec menu.");
 	mvm_drop_revivemarker = CreateConVar("mvm_drop_revivemarker", "0", "When set to 1, drop revive marker when player dead.");
 	mvm_enable_music = CreateConVar("mvm_enable_music", "1", "When set to 1, Mann vs. Machine music will play at the start and end of a round.");
 	mvm_carteen_cooldown = CreateConVar("mvm_carteen_cooldown", "30.0", "Cooldown time of carteen.", _, true, 0.0);
@@ -396,26 +394,6 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 				// Required for tracking of spent currency
 				SetMannVsMachineMode(true);
 			}
-			else if (strcmp(section, "MvM_UpgradesBegin") == 0)
-			{
-				if(mvm_disable_respec_menu.BoolValue
-					|| CheckRoundState() == 1)	return Plugin_Continue;
-
-				//Create a menu to substitute client-side "Refund Upgrades" button
-				Menu menu = new Menu(MenuHandler_UpgradeRespec, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-
-				menu.SetTitle("%t", "MvM_UpgradeStation");
-				menu.AddItem("respec", "MvM_UpgradeRespec");
-
-				if (menu.Display(client, MENU_TIME_FOREVER))
-				{
-					MvMPlayer(client).RespecMenu = menu;
-				}
-				else
-				{
-					delete menu;
-				}
-			}
 			else if (strcmp(section, "MvM_UpgradesDone") == 0
 				&& kv.GetNum("num_upgrades", 0) > 0)
 			{
@@ -582,22 +560,11 @@ public int MenuHandler_UpgradeRespec(Menu menu, MenuAction action, int param1, i
 			{
 				if (strcmp(info, "respec") == 0)
 				{
-					// FIXME: 사용한 수통은 초기화되지 않고 자금 사용량에서 차감되지도 않음
+					// FIXME: 사용한 수통은 초기화되지 않고 자금 사용량에서 차감되지도 않음 
 					// MvMPlayer(param1).Currency += spentCurrency;
-					MvMPlayer(param1).Currency = mvm_starting_currency.IntValue;
+					// MvMPlayer(param1).Currency = mvm_starting_currency.IntValue;
 
-					MvMPlayer(param1).RemoveAllUpgrades();
-					SetEntProp(param1, Prop_Send, "m_bInUpgradeZone", false);
-/*
-					int populator = FindEntityByClassname(MaxClients + 1, "info_populator");
-					if (populator != -1)
-					{
-						//This should put us at the right currency, given that we've removed item and player upgrade tracking by this point
-						// int totalAcquiredCurrency = MvMTeam(TF2_GetClientTeam(param1)).AcquiredCredits + mvm_starting_currency.IntValue;
-						// int spentCurrency = SDKCall_GetPlayerCurrencySpent(populator, param1);
-						// MvMPlayer(param1).Currency = totalAcquiredCurrency - spentCurrency;	
-					}
-*/
+					RespecClient(param1);
 				}
 			}
 		}
@@ -621,4 +588,20 @@ public int MenuHandler_UpgradeRespec(Menu menu, MenuAction action, int param1, i
 	}
 
 	return 0;
+}
+
+void RespecClient(int client)
+{
+	MvMPlayer(client).RemoveAllUpgrades();
+	
+	int populator = FindEntityByClassname(MaxClients + 1, "info_populator");
+	if (populator != -1)
+	{
+		//This should put us at the right currency, given that we've removed item and player upgrade tracking by this point
+		int totalAcquiredCurrency = MvMTeam(TF2_GetClientTeam(client)).AcquiredCredits + mvm_starting_currency.IntValue;
+		int spentCurrency = SDKCall_GetPlayerCurrencySpent(populator, client);
+		MvMPlayer(client).Currency = totalAcquiredCurrency - spentCurrency;	
+
+		SetEntProp(client, Prop_Send, "m_bInUpgradeZone", false);
+	}
 }
