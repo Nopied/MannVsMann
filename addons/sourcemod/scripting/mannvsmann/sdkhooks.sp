@@ -118,8 +118,9 @@ public void CurrencyPack_SpawnPost(int currencypack)
 public Action CurrencyPack_SetTransmit(int currencypack, int client)
 {
 	//Only transmit currency packs to our own team and spectators
-	if (TF2_GetClientTeam(client) != TFTeam_Spectator && TF2_GetTeam(currencypack) != TF2_GetClientTeam(client))
-		return Plugin_Handled;
+	// TODO: make this configable
+	// if (TF2_GetClientTeam(client) != TFTeam_Spectator && TF2_GetTeam(currencypack) != TF2_GetClientTeam(client))
+	// 	return Plugin_Handled;
 
 	return Plugin_Continue;
 }
