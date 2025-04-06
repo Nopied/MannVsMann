@@ -283,7 +283,7 @@ public Action OnTouchUpgradeStation(int upgradeStation, int other)
 public void OnClientPutInServer(int client)
 {
 	MvMPlayer(client).CarteenCooldown = 0.0;
-	MvMPlayer(client).Currency = mvm_starting_currency.IntValue;
+	MvMPlayer(client).Currency = mvm_starting_currency.IntValue + RoundFloat(GetEngineTime());
 
 	SDKHooks_HookClient(client);
 }
