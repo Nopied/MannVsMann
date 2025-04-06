@@ -571,6 +571,12 @@ public int MenuHandler_UpgradeRespec(Menu menu, MenuAction action, int param1, i
 
 			if(CheckRoundState() == 1)	return 0;
 
+			if(GetEntProp(param1, Prop_Send, "m_bInUpgradeZone") == 0)
+			{
+				PrintToChat(param1, "%T", "MvM_RefundOnMenu", param1);
+				return 0;
+			}
+
 			char info[64];
 			if (menu.GetItem(param2, info, sizeof(info)))
 			{

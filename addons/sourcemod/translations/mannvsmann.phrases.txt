@@ -33,4 +33,8 @@
 	{
 		"en"	"This upgrade has been banned! Please upgrade another!"
 	}
+	"MvM_RefundOnMenu"
+	{
+		"en"	"Refunds are only possible when the upgrade is open!"
+	}
 }
