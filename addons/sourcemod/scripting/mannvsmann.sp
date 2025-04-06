@@ -285,7 +285,7 @@ public void OnClientPutInServer(int client)
 	RespecClient(client, false);
 
 	MvMPlayer(client).CarteenCooldown = 0.0;
-	MvMPlayer(client).Currency = mvm_starting_currency.IntValue + RoundFloat(GetEngineTime());
+	MvMPlayer(client).Currency = mvm_starting_currency.IntValue + RoundFloat(GetGameTime());
 
 	int populator = FindEntityByClassname(MaxClients + 1, "info_populator"),
 		spentCurrency = SDKCall_GetPlayerCurrencySpent(populator, client);
