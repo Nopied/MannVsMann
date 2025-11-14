@@ -5,6 +5,7 @@ void Natives_Initialize()
     CreateNative("MVM_GetPlayerCurrencySpent", Native_GetPlayerCurrencySpent);
     CreateNative("MVM_GetPlayerCurrency", Native_GetPlayerCurrency);
     CreateNative("MVM_SetPlayerCurrency", Native_SetPlayerCurrency);
+    CreateNative("MVM_AddPlayerCurrency", Native_AddPlayerCurrency);
     CreateNative("MVM_RemoveAllUpgrades", Native_RemoveAllUpgrades);
     CreateNative("MVM_DropCurrency", Native_DropCurrency);
 }
@@ -46,6 +47,14 @@ public /*void*/ int Native_SetPlayerCurrency(Handle plugin, int numParams)
 {
     int client = GetNativeCell(1), currency = GetNativeCell(2);
     MvMPlayer(client).Currency = currency;
+
+    return 0;
+}
+
+public /*void*/ int Native_AddPlayerCurrency(Handle plugin, int numParams)
+{
+    int client = GetNativeCell(1), currency = GetNativeCell(2);
+    MvMPlayer(client).AddCurrency(currency);
 
     return 0;
 }

@@ -57,6 +57,19 @@ native int MVM_GetPlayerCurrency(int client);
 native void MVM_SetPlayerCurrency(int client, int currency);
 
 /**
+ * Add player's currency
+ * This lets the upgrade system know player's currency history.
+ * so that refund system works properly.
+ * 
+ * @param client       player's index
+ * @param currency     currency value
+ * 
+ * @noreturn
+ * 
+ */
+native void MVM_AddPlayerCurrency(int client, int currency);
+
+/**
  * Remove All of player's upgrade
  * 
  * @param client       player's index

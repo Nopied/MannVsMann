@@ -28,6 +28,7 @@ static Handle g_SDKCallShouldSwitchTeams;
 // static Handle g_SDKCallShouldScrambleTeams;
 static Handle g_SDKCallGetNextRespawnWave;
 static Handle g_SDKCallReapplyPlayerUpgrade;
+static Handle g_SDKCallDistributeCurrencyAmount;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -44,6 +45,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	// g_SDKCallShouldScrambleTeams = PrepSDKCall_ShouldScrambleTeams(gamedata);
 	g_SDKCallGetNextRespawnWave = PrepSDKCall_GetNextRespawnWave(gamedata);
 	g_SDKCallReapplyPlayerUpgrade = PrepSDKCall_ReapplyPlayerUpgrade(gamedata);
+	g_SDKCallDistributeCurrencyAmount = PrepSDKCall_DistributeCurrencyAmount(gamedata);
 }
 
 Handle PrepSDKCall_ResetMap(GameData gamedata)
@@ -225,6 +227,25 @@ Handle PrepSDKCall_ReapplyPlayerUpgrade(GameData gamedata)
 	return call;
 }
 
+// int CTFGameRules::DistributeCurrencyAmount( int nAmount, CTFPlayer *pTFPlayer /* = NULL */, bool bShared /* = true */, bool bCountAsDropped /*= false */, bool bIsBonus /*= false */ )
+Handle PrepSDKCall_DistributeCurrencyAmount(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFGameRules::DistributeCurrencyAmount");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDK call: CTFGameRules::DistributeCurrencyAmount");
+
+	return call;
+}
+
 
 void SDKCall_ResetMap(int populator)
 {
@@ -320,4 +341,13 @@ void SDKCall_ReapplyPlayerUpgrades(int client)
 {
 	if(g_SDKCallReapplyPlayerUpgrade)
 		SDKCall(g_SDKCallReapplyPlayerUpgrade, client);
+}
+
+// int CTFGameRules::DistributeCurrencyAmount( int nAmount, CTFPlayer *pTFPlayer /* = NULL */, bool bShared /* = true */, bool bCountAsDropped /*= false */, bool bIsBonus /*= false */ )
+int SDKCall_DistributeCurrencyAmount(int populator, int nAmount, int player, bool bShared = true, bool bCountAsDropped = false, bool bIsBonus = false)
+{
+	if (g_SDKCallDistributeCurrencyAmount)
+		return SDKCall(g_SDKCallDistributeCurrencyAmount, populator, nAmount, player, bShared, bCountAsDropped, bIsBonus);
+
+	return -1;
 }

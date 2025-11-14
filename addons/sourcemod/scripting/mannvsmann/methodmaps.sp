@@ -87,6 +87,17 @@ methodmap MvMPlayer
 		}
 	}
 
+	public void AddCurrency(int currency)
+	{
+		SetMannVsMachineMode(true);
+
+		// FIXME: Performance
+		int populator = FindEntityByClassname(MaxClients + 1, "info_populator");
+		SDKCall_DistributeCurrencyAmount(populator, currency, this.Client, false, false, false);
+
+		ResetMannVsMachineMode();
+	}
+
 	public void SetTeam(TFTeam team)
 	{
 		int count = ++g_PlayerTeamCount[this.Client];
